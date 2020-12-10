@@ -6,7 +6,6 @@ package io.flutter.plugins.firebase.messaging;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import com.google.firebase.messaging.RemoteMessage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import io.flutter.plugins.firebase.messaging.core.FlutterFirebaseMessagingUtils;
+import io.flutter.plugins.firebase.messaging.core.PushRemoteMessage;
 
 public class FlutterFirebaseMessagingStore {
   private static final String PREFERENCES_FILE = "io.flutter.plugins.firebase.messaging";
@@ -51,16 +51,16 @@ public class FlutterFirebaseMessagingStore {
     return getPreferences().getString(key, defaultValue);
   }
 
-  public void storeFirebaseMessage(RemoteMessage remoteMessage) {
+  public void storeFirebaseMessage(PushRemoteMessage remoteMessage) {
     String remoteMessageString =
         new JSONObject(FlutterFirebaseMessagingUtils.remoteMessageToMap(remoteMessage)).toString();
-    setPreferencesStringValue(remoteMessage.getMessageId(), remoteMessageString);
+    setPreferencesStringValue(remoteMessage.messageId, remoteMessageString);
 
     // Save new notification id.
     // Note that this is using a comma delimited string to preserve ordering. We could use a String Set
     // on SharedPreferences but this won't guarantee ordering when we want to remove the oldest added ids.
     String notifications = getPreferencesStringValue(KEY_NOTIFICATION_IDS, "");
-    notifications += remoteMessage.getMessageId() + DELIMITER; // append to last
+    notifications += remoteMessage.messageId + DELIMITER; // append to last
 
     // Check and remove old notification messages.
     List<String> allNotificationList =
@@ -74,7 +74,7 @@ public class FlutterFirebaseMessagingStore {
     setPreferencesStringValue(KEY_NOTIFICATION_IDS, notifications);
   }
 
-  public RemoteMessage getFirebaseMessage(String remoteMessageId) {
+  public PushRemoteMessage getFirebaseMessage(String remoteMessageId) {
     String remoteMessageString = getPreferencesStringValue(remoteMessageId, null);
     if (remoteMessageString != null) {
       try {

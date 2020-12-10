@@ -13,7 +13,7 @@ import io.flutter.plugins.firebase.messaging.core.LogUtils;
  * <p>
  * vivo push receiver
  **/
-public class VivoPushMessagingReceiver extends OpenClientPushMessageReceiver {
+public class VivoMessagingReceiver extends OpenClientPushMessageReceiver {
 
   @Override
   public void onReceiveRegId(Context context, String regId) {
@@ -23,6 +23,6 @@ public class VivoPushMessagingReceiver extends OpenClientPushMessageReceiver {
 
   @Override
   public void onNotificationMessageClicked(Context context, UPSNotificationMessage message) {
-
+    LogUtils.d("Vivo onNotificationMessageClicked:" + message.getMsgId());
   }
 }

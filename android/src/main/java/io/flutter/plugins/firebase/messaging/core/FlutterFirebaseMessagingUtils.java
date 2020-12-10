@@ -25,6 +25,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import io.flutter.plugins.firebase.messaging.ContextHolder;
+import io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingBackgroundService;
+import io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingPlugin;
+import io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingStore;
+
 public class FlutterFirebaseMessagingUtils {
   public static final String IS_AUTO_INIT_ENABLED = "isAutoInitEnabled";
   public static final String SHARED_PREFERENCES_KEY = "io.flutter.firebase.messaging.callback";
@@ -53,9 +58,9 @@ public class FlutterFirebaseMessagingUtils {
       return PushType.VIVO;
     } else if (RomUtils.isMiui()) {
       return PushType.XIAOMI;
-    } else if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == 0){
+    } else if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == 0) {
       return PushType.FCM;
-    } else{
+    } else {
       return null;
     }
   }
@@ -66,123 +71,155 @@ public class FlutterFirebaseMessagingUtils {
     LocalBroadcastManager.getInstance(context).sendBroadcast(onMessageIntent);
   }
 
-  public static Map<String, Object> remoteMessageToMap(RemoteMessage remoteMessage) {
+  public static void sendMessageBroadcast(Context context, PushRemoteMessage remoteMessage) {
+    if (ContextHolder.getApplicationContext() == null) {
+      ContextHolder.setApplicationContext(context.getApplicationContext());
+    }
+
+    // Store the RemoteMessage if the message contains a notification payload.
+    if (remoteMessage.notification != null) {
+      FlutterFirebaseMessagingPlugin.notifications.put(remoteMessage.messageId, remoteMessage);
+      FlutterFirebaseMessagingStore.getInstance().storeFirebaseMessage(remoteMessage);
+    }
+
+    //  |-> ---------------------
+    //      App in Foreground
+    //   ------------------------
+    if (FlutterFirebaseMessagingUtils.isApplicationForeground(context)) {
+      Intent onMessageIntent = new Intent(FlutterFirebaseMessagingUtils.ACTION_REMOTE_MESSAGE);
+      onMessageIntent.putExtra(FlutterFirebaseMessagingUtils.EXTRA_REMOTE_MESSAGE, remoteMessage);
+      LocalBroadcastManager.getInstance(context).sendBroadcast(onMessageIntent);
+      return;
+    }
+
+    //  |-> ---------------------
+    //    App in Background/Quit
+    //   ------------------------
+    Intent onBackgroundMessageIntent =
+        new Intent(context, FlutterFirebaseMessagingBackgroundService.class);
+    onBackgroundMessageIntent.putExtra(
+        FlutterFirebaseMessagingUtils.EXTRA_REMOTE_MESSAGE, remoteMessage);
+    FlutterFirebaseMessagingBackgroundService.enqueueMessageProcessing(
+        context, onBackgroundMessageIntent);
+
+  }
+
+
+  public static Map<String, Object> remoteMessageToMap(PushRemoteMessage remoteMessage) {
     Map<String, Object> messageMap = new HashMap<>();
     Map<String, Object> dataMap = new HashMap<>();
 
-    if (remoteMessage.getCollapseKey() != null) {
-      messageMap.put(KEY_COLLAPSE_KEY, remoteMessage.getCollapseKey());
+    if (remoteMessage.collapseKey != null) {
+      messageMap.put(KEY_COLLAPSE_KEY, remoteMessage.collapseKey);
     }
 
-    if (remoteMessage.getFrom() != null) {
-      messageMap.put(KEY_FROM, remoteMessage.getFrom());
+    if (remoteMessage.from != null) {
+      messageMap.put(KEY_FROM, remoteMessage.from);
     }
 
-    if (remoteMessage.getTo() != null) {
-      messageMap.put(KEY_TO, remoteMessage.getTo());
+    if (remoteMessage.to != null) {
+      messageMap.put(KEY_TO, remoteMessage.to);
     }
 
-    if (remoteMessage.getMessageId() != null) {
-      messageMap.put(KEY_MESSAGE_ID, remoteMessage.getMessageId());
+    if (remoteMessage.messageId != null) {
+      messageMap.put(KEY_MESSAGE_ID, remoteMessage.messageId);
     }
 
-    if (remoteMessage.getMessageType() != null) {
-      messageMap.put(KEY_MESSAGE_TYPE, remoteMessage.getMessageType());
+    if (remoteMessage.messageType != null) {
+      messageMap.put(KEY_MESSAGE_TYPE, remoteMessage.messageType);
     }
 
-    if (remoteMessage.getData().size() > 0) {
-      Set<Map.Entry<String, String>> entries = remoteMessage.getData().entrySet();
+    if (remoteMessage.data.size() > 0) {
+      Set<Map.Entry<String, String>> entries = remoteMessage.data.entrySet();
       for (Map.Entry<String, String> entry : entries) {
         dataMap.put(entry.getKey(), entry.getValue());
       }
     }
 
     messageMap.put(KEY_DATA, dataMap);
-    messageMap.put(KEY_TTL, remoteMessage.getTtl());
-    messageMap.put(KEY_SENT_TIME, remoteMessage.getSentTime());
+    messageMap.put(KEY_TTL, remoteMessage.ttl);
+    messageMap.put(KEY_SENT_TIME, remoteMessage.sentTime);
 
-    if (remoteMessage.getNotification() != null) {
+    if (remoteMessage.notification != null) {
       messageMap.put(
-        "notification", remoteMessageNotificationToMap(remoteMessage.getNotification()));
+          "notification", remoteMessageNotificationToMap(remoteMessage.notification));
     }
 
     return messageMap;
   }
 
-  private static Map<String, Object> remoteMessageNotificationToMap(
-    RemoteMessage.Notification notification) {
+  private static Map<String, Object> remoteMessageNotificationToMap(PushRemoteMessage.Notification notification) {
     Map<String, Object> notificationMap = new HashMap<>();
-    Map<String, Object> androidNotificationMap = new HashMap<>();
 
-    if (notification.getTitle() != null) {
-      notificationMap.put("title", notification.getTitle());
+    if (notification.title != null) {
+      notificationMap.put("title", notification.title);
     }
 
-    if (notification.getTitleLocalizationKey() != null) {
-      notificationMap.put("titleLocKey", notification.getTitleLocalizationKey());
+    if (notification.titleLocKey != null) {
+      notificationMap.put("titleLocKey", notification.titleLocKey);
     }
 
-    if (notification.getTitleLocalizationArgs() != null) {
-      notificationMap.put("titleLocArgs", Arrays.asList(notification.getTitleLocalizationArgs()));
+    if (notification.titleLocArgs != null) {
+      notificationMap.put("titleLocArgs", Arrays.asList(notification.titleLocArgs));
     }
 
-    if (notification.getBody() != null) {
-      notificationMap.put("body", notification.getBody());
+    if (notification.body != null) {
+      notificationMap.put("body", notification.body);
     }
 
-    if (notification.getBodyLocalizationKey() != null) {
-      notificationMap.put("bodyLocKey", notification.getBodyLocalizationKey());
+    if (notification.bodyLocKey != null) {
+      notificationMap.put("bodyLocKey", notification.bodyLocKey);
     }
 
-    if (notification.getBodyLocalizationArgs() != null) {
-      notificationMap.put("bodyLocArgs", Arrays.asList(notification.getBodyLocalizationArgs()));
+    if (notification.bodyLocArgs != null) {
+      notificationMap.put("bodyLocArgs", Arrays.asList(notification.bodyLocArgs));
     }
 
-    if (notification.getChannelId() != null) {
-      androidNotificationMap.put("channelId", notification.getChannelId());
-    }
+    if (notification.android != null) {
+      Map<String, Object> androidNotificationMap = new HashMap<>();
 
-    if (notification.getClickAction() != null) {
-      androidNotificationMap.put("clickAction", notification.getClickAction());
-    }
+      if (notification.android.channelId != null) {
+        androidNotificationMap.put("channelId", notification.android.channelId);
+      }
 
-    if (notification.getColor() != null) {
-      androidNotificationMap.put("color", notification.getColor());
-    }
+      if (notification.android.clickAction != null) {
+        androidNotificationMap.put("clickAction", notification.android.clickAction);
+      }
 
-    if (notification.getIcon() != null) {
-      androidNotificationMap.put("smallIcon", notification.getIcon());
-    }
+      if (notification.android.color != null) {
+        androidNotificationMap.put("color", notification.android.color);
+      }
 
-    if (notification.getImageUrl() != null) {
-      androidNotificationMap.put("imageUrl", notification.getImageUrl().toString());
-    }
+      if (notification.android.smallIcon != null) {
+        androidNotificationMap.put("smallIcon", notification.android.smallIcon);
+      }
 
-    if (notification.getLink() != null) {
-      androidNotificationMap.put("link", notification.getLink().toString());
-    }
+      if (notification.android.imageUrl != null) {
+        androidNotificationMap.put("imageUrl", notification.android.imageUrl);
+      }
 
-    if (notification.getNotificationCount() != null) {
-      androidNotificationMap.put("count", notification.getNotificationCount());
-    }
+      if (notification.android.link != null) {
+        androidNotificationMap.put("link", notification.android.link);
+      }
 
-    if (notification.getNotificationPriority() != null) {
-      androidNotificationMap.put("priority", notification.getNotificationPriority());
-    }
+      if (notification.android.priority != null) {
+        androidNotificationMap.put("priority", notification.android.priority);
+      }
 
-    if (notification.getSound() != null) {
-      androidNotificationMap.put("sound", notification.getSound());
-    }
+      if (notification.android.sound != null) {
+        androidNotificationMap.put("sound", notification.android.sound);
+      }
 
-    if (notification.getTicker() != null) {
-      androidNotificationMap.put("ticker", notification.getTicker());
-    }
+      if (notification.android.ticker != null) {
+        androidNotificationMap.put("ticker", notification.android.ticker);
+      }
 
-    if (notification.getVisibility() != null) {
-      androidNotificationMap.put("visibility", notification.getVisibility());
-    }
+      if (notification.android.visibility != null) {
+        androidNotificationMap.put("visibility", notification.android.visibility);
+      }
 
-    notificationMap.put("android", androidNotificationMap);
+      notificationMap.put("android", androidNotificationMap);
+    }
     return notificationMap;
   }
 
@@ -197,24 +234,24 @@ public class FlutterFirebaseMessagingUtils {
    */
   public static boolean isApplicationForeground(Context context) {
     KeyguardManager keyguardManager =
-      (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+        (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
 
     if (keyguardManager != null && keyguardManager.isKeyguardLocked()) {
       return false;
     }
 
     ActivityManager activityManager =
-      (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
     if (activityManager == null) return false;
 
     List<ActivityManager.RunningAppProcessInfo> appProcesses =
-      activityManager.getRunningAppProcesses();
+        activityManager.getRunningAppProcesses();
     if (appProcesses == null) return false;
 
     final String packageName = context.getPackageName();
     for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
       if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
-        && appProcess.processName.equals(packageName)) {
+          && appProcess.processName.equals(packageName)) {
         return true;
       }
     }
@@ -234,42 +271,20 @@ public class FlutterFirebaseMessagingUtils {
    * @param arguments Method channel call arguments.
    * @return RemoteMessage
    */
-  public static RemoteMessage getRemoteMessageForArguments(Map<String, Object> arguments) {
+  public static PushRemoteMessage getRemoteMessageForArguments(Map<String, Object> arguments) {
     @SuppressWarnings("unchecked")
     Map<String, Object> messageMap =
-      (Map<String, Object>) Objects.requireNonNull(arguments.get("message"));
+        (Map<String, Object>) Objects.requireNonNull(arguments.get("message"));
 
-    String to = (String) Objects.requireNonNull(messageMap.get("to"));
-    RemoteMessage.Builder builder = new RemoteMessage.Builder(to);
+    PushRemoteMessage remoteMessage = new PushRemoteMessage();
 
-    String collapseKey = (String) messageMap.get("collapseKey");
-    String messageId = (String) messageMap.get("messageId");
-    String messageType = (String) messageMap.get("messageType");
-    Integer ttl = (Integer) messageMap.get("ttl");
+    remoteMessage.to = (String) messageMap.get("to");
+    remoteMessage.collapseKey = (String) messageMap.get("collapseKey");
+    remoteMessage.messageId = (String) messageMap.get("messageId");
+    remoteMessage.messageType = (String) messageMap.get("messageType");
+    remoteMessage.ttl = (Integer) messageMap.get("ttl");
+    remoteMessage.data = (Map<String, String>) messageMap.get("data");
 
-    @SuppressWarnings("unchecked")
-    Map<String, String> data = (Map<String, String>) messageMap.get("data");
-
-    if (collapseKey != null) {
-      builder.setCollapseKey(collapseKey);
-    }
-
-    if (messageType != null) {
-      builder.setMessageType(messageType);
-    }
-
-    if (messageId != null) {
-      builder.setMessageId(messageId);
-    }
-
-    if (ttl != null) {
-      builder.setTtl(ttl);
-    }
-
-    if (data != null) {
-      builder.setData(data);
-    }
-
-    return builder.build();
+    return remoteMessage;
   }
 }

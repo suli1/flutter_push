@@ -5,9 +5,8 @@ import com.heytap.msp.push.HeytapPushManager;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import io.flutter.plugins.firebase.messaging.core.LogUtils;
 import io.flutter.plugins.firebase.messaging.core.PushConfig;
-import io.flutter.plugins.firebase.messaging.core.receiver.OppoPushMessagingService;
+import io.flutter.plugins.firebase.messaging.core.receiver.OppoMessagingService;
 
 /**
  * Created by suli on 2020/12/7
@@ -23,7 +22,7 @@ public class OppoPush extends BasePushClient {
 
   @Override
   public void register() {
-    HeytapPushManager.register(getContext(), config.appKey, config.appSecret, new OppoPushMessagingService(getContext()));
+    HeytapPushManager.register(getContext(), config.appKey, config.appSecret, new OppoMessagingService(getContext()));
   }
 
   @Override

@@ -10,10 +10,10 @@ import io.flutter.plugins.firebase.messaging.core.LogUtils;
 /**
  * Created by suli on 2020/12/7
  **/
-public class OppoPushMessagingService implements ICallBackResultService {
+public class OppoMessagingService implements ICallBackResultService {
   private final Context context;
 
-  public OppoPushMessagingService(Context context) {
+  public OppoMessagingService(Context context) {
     this.context = context;
   }
 

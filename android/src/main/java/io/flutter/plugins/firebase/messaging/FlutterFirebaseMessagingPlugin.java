@@ -42,6 +42,7 @@ import io.flutter.plugins.firebase.messaging.core.FlutterFirebaseMessagingUtils;
 import io.flutter.plugins.firebase.messaging.core.IPush;
 import io.flutter.plugins.firebase.messaging.core.LogUtils;
 import io.flutter.plugins.firebase.messaging.core.PushConfig;
+import io.flutter.plugins.firebase.messaging.core.PushRemoteMessage;
 import io.flutter.plugins.firebase.messaging.core.PushType;
 import io.flutter.plugins.firebase.messaging.core.client.FcmPush;
 import io.flutter.plugins.firebase.messaging.core.client.HuaweiPush;
@@ -54,18 +55,18 @@ import static io.flutter.plugins.firebase.core.FlutterFirebasePluginRegistry.reg
 /**
  * FlutterFirebaseMessagingPlugin
  */
-public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver
-  implements FlutterFirebasePlugin,
-  MethodCallHandler,
-  NewIntentListener,
-  FlutterPlugin,
-  ActivityAware {
+public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
+    FlutterFirebasePlugin,
+    MethodCallHandler,
+    NewIntentListener, FlutterPlugin, ActivityAware {
+
+  public static HashMap<String, PushRemoteMessage> notifications = new HashMap<>();
 
   private Context applicationContext;
   private final HashMap<String, Boolean> consumedInitialMessages = new HashMap<>();
   private MethodChannel channel;
   private Activity mainActivity;
-  private RemoteMessage initialMessage;
+  private PushRemoteMessage initialMessage;
   private IPush pushClient;
 
   @SuppressWarnings("unused")
@@ -86,7 +87,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver
     intentFilter.addAction(FlutterFirebaseMessagingUtils.ACTION_TOKEN);
     intentFilter.addAction(FlutterFirebaseMessagingUtils.ACTION_REMOTE_MESSAGE);
     LocalBroadcastManager manager =
-      LocalBroadcastManager.getInstance(ContextHolder.getApplicationContext());
+        LocalBroadcastManager.getInstance(ContextHolder.getApplicationContext());
     manager.registerReceiver(this, intentFilter);
 
     registerPlugin(channelName, this);
@@ -109,8 +110,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
     applicationContext = null;
-    LocalBroadcastManager.getInstance(ContextHolder.getApplicationContext())
-      .unregisterReceiver(this);
+    LocalBroadcastManager.getInstance(ContextHolder.getApplicationContext()).unregisterReceiver(this);
   }
 
   @Override
@@ -118,8 +118,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver
     binding.addOnNewIntentListener(this);
     this.mainActivity = binding.getActivity();
     if (mainActivity.getIntent() != null && mainActivity.getIntent().getExtras() != null) {
-      if ((mainActivity.getIntent().getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY)
-        != Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) {
+      if ((mainActivity.getIntent().getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) {
         onNewIntent(mainActivity.getIntent());
       }
     }
@@ -154,8 +153,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver
       String token = intent.getStringExtra(FlutterFirebaseMessagingUtils.EXTRA_TOKEN);
       channel.invokeMethod("Messaging#onTokenRefresh", token);
     } else if (action.equals(FlutterFirebaseMessagingUtils.ACTION_REMOTE_MESSAGE)) {
-      RemoteMessage message =
-        intent.getParcelableExtra(FlutterFirebaseMessagingUtils.EXTRA_REMOTE_MESSAGE);
+      PushRemoteMessage message = intent.getParcelableExtra(FlutterFirebaseMessagingUtils.EXTRA_REMOTE_MESSAGE);
       if (message == null) return;
       Map<String, Object> content = FlutterFirebaseMessagingUtils.remoteMessageToMap(message);
       channel.invokeMethod("Messaging#onMessage", content);
@@ -164,138 +162,141 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver
 
   private Task<Void> initPush() {
     return Tasks.call(
-      cachedThreadPool,
-      () -> {
-        HeytapPushManager.init(applicationContext, LogUtils.debuggable);
-        PushType pushType = FlutterFirebaseMessagingUtils.getSupportedPush(applicationContext);
-        if (pushType == null) {
-          pushType = PushType.XIAOMI;
-        }
-        LogUtils.d("Support push type:" + pushType.name());
-
-        PushConfig pushConfig = new PushConfig();
-        pushConfig.type = pushType;
-
-        switch (pushType) {
-          case FCM:
-            pushClient = new FcmPush(pushConfig);
-            break;
-          case OPPO: {
-            Bundle metaData = applicationContext.getPackageManager().getApplicationInfo(applicationContext.getPackageName(), PackageManager.GET_META_DATA).metaData;
-            pushConfig.appKey = metaData.getString("com.oppo.push.app_key");
-            pushConfig.appSecret = metaData.getString("com.oppo.push.app_secrect");
-            pushClient = new OppoPush(pushConfig);
-            break;
+        cachedThreadPool,
+        () -> {
+          HeytapPushManager.init(applicationContext, LogUtils.debuggable);
+          PushType pushType = FlutterFirebaseMessagingUtils.getSupportedPush(applicationContext);
+          if (pushType == null) {
+            pushType = PushType.XIAOMI;
           }
-          case VIVO:
-            pushClient = new VivoPush(pushConfig);
-            break;
-          case XIAOMI: {
-            Bundle metaData = applicationContext.getPackageManager().getApplicationInfo(applicationContext.getPackageName(), PackageManager.GET_META_DATA).metaData;
-            pushConfig.appId = metaData.getString("com.xiaomi.push.app_id");
-            pushConfig.appKey = metaData.getString("com.xiaomi.push.app_key");
-            pushClient = new XiaomiPush(pushConfig);
-            break;
+          LogUtils.d("Support push type:" + pushType.name());
+
+          PushConfig pushConfig = new PushConfig();
+          pushConfig.type = pushType;
+
+          switch (pushType) {
+            case FCM:
+              pushClient = new FcmPush(pushConfig);
+              break;
+            case OPPO: {
+              Bundle metaData = applicationContext.getPackageManager()
+                  .getApplicationInfo(applicationContext.getPackageName(),
+                      PackageManager.GET_META_DATA).metaData;
+              pushConfig.appKey = metaData.getString("com.oppo.push.app_key");
+              pushConfig.appSecret = metaData.getString("com.oppo.push.app_secrect");
+              pushClient = new OppoPush(pushConfig);
+              break;
+            }
+            case VIVO:
+              pushClient = new VivoPush(pushConfig);
+              break;
+            case XIAOMI: {
+              Bundle metaData = applicationContext.getPackageManager()
+                  .getApplicationInfo(applicationContext.getPackageName(),
+                      PackageManager.GET_META_DATA).metaData;
+              pushConfig.appId = metaData.getString("com.xiaomi.push.app_id");
+              pushConfig.appKey = metaData.getString("com.xiaomi.push.app_key");
+              pushClient = new XiaomiPush(pushConfig);
+              break;
+            }
+            case HUAWEI:
+              pushClient = new HuaweiPush(pushConfig);
+              break;
+            default:
+              return null;
           }
-          case HUAWEI:
-            pushClient = new HuaweiPush(pushConfig);
-            break;
-          default:
-            return null;
-        }
-        pushClient.register();
-        return null;
-      });
+          pushClient.register();
+          return null;
+        });
   }
 
   private Task<Void> deleteToken(Map<String, Object> arguments) {
     return Tasks.call(
-      cachedThreadPool,
-      () -> {
-        pushClient.deleteToken();
-        return null;
-      });
+        cachedThreadPool,
+        () -> {
+          pushClient.deleteToken();
+          return null;
+        });
   }
 
   private Task<Map<String, Object>> getToken(Map<String, Object> arguments) {
     return Tasks.call(
-      cachedThreadPool,
-      () -> {
-        String token = pushClient.getToken();
-        LogUtils.d("Get push token:" + token);
-        return new HashMap<String, Object>() {
-          {
-            put("token", token);
-          }
-        };
-      });
+        cachedThreadPool,
+        () -> {
+          String token = pushClient.getToken();
+          LogUtils.d("Get push token:" + token);
+          return new HashMap<String, Object>() {
+            {
+              put("token", token);
+            }
+          };
+        });
   }
 
   private Task<Void> subscribeToTopic(Map<String, Object> arguments) {
     return Tasks.call(
-      cachedThreadPool,
-      () -> {
-        pushClient.subscribeToTopic(arguments);
-        return null;
-      });
+        cachedThreadPool,
+        () -> {
+          pushClient.subscribeToTopic(arguments);
+          return null;
+        });
   }
 
   private Task<Void> unsubscribeFromTopic(Map<String, Object> arguments) {
     return Tasks.call(
-      cachedThreadPool,
-      () -> {
-        pushClient.unsubscribeFromTopic(arguments);
-        return null;
-      });
+        cachedThreadPool,
+        () -> {
+          pushClient.unsubscribeFromTopic(arguments);
+          return null;
+        });
   }
 
   private Task<Map<String, Object>> getInitialMessage(Map<String, Object> arguments) {
     return Tasks.call(
-      cachedThreadPool,
-      () -> {
-        if (initialMessage != null) {
-          Map<String, Object> remoteMessageMap =
-            FlutterFirebaseMessagingUtils.remoteMessageToMap(initialMessage);
-          initialMessage = null;
-          return remoteMessageMap;
-        }
+        cachedThreadPool,
+        () -> {
+          if (initialMessage != null) {
+            Map<String, Object> remoteMessageMap =
+                FlutterFirebaseMessagingUtils.remoteMessageToMap(initialMessage);
+            initialMessage = null;
+            return remoteMessageMap;
+          }
 
-        if (mainActivity == null) {
-          return null;
-        }
+          if (mainActivity == null) {
+            return null;
+          }
 
-        Intent intent = mainActivity.getIntent();
+          Intent intent = mainActivity.getIntent();
 
-        if (intent == null || intent.getExtras() == null) {
-          return null;
-        }
+          if (intent == null || intent.getExtras() == null) {
+            return null;
+          }
 
-        // Remote Message ID can be either one of the following...
-        String messageId = intent.getExtras().getString("google.message_id");
-        if (messageId == null) messageId = intent.getExtras().getString("message_id");
+          // Remote Message ID can be either one of the following...
+          String messageId = intent.getExtras().getString("google.message_id");
+          if (messageId == null) messageId = intent.getExtras().getString("message_id");
 
-        // We only want to handle non-consumed initial messages.
-        if (messageId == null || consumedInitialMessages.get(messageId) != null) {
-          return null;
-        }
+          // We only want to handle non-consumed initial messages.
+          if (messageId == null || consumedInitialMessages.get(messageId) != null) {
+            return null;
+          }
 
-        RemoteMessage remoteMessage =
-          FlutterFirebaseMessagingReceiver.notifications.get(messageId);
+          PushRemoteMessage remoteMessage = FlutterFirebaseMessagingPlugin.notifications.get(messageId);
 
-        // If we can't find a copy of the remote message in memory then check from our persisted store.
-        if (remoteMessage == null) {
-          remoteMessage =
-            FlutterFirebaseMessagingStore.getInstance().getFirebaseMessage(messageId);
-          FlutterFirebaseMessagingStore.getInstance().removeFirebaseMessage(messageId);
-        }
+          // If we can't find a copy of the remote message in memory then check from our persisted store.
+          if (remoteMessage == null) {
+            remoteMessage =
+                FlutterFirebaseMessagingStore.getInstance().getFirebaseMessage(messageId);
+            FlutterFirebaseMessagingStore.getInstance().removeFirebaseMessage(messageId);
+          }
 
-        if (remoteMessage == null) {
-          return null;
-        }
+          if (remoteMessage == null) {
+            return null;
+          }
 
-        consumedInitialMessages.put(messageId, true);
-        return FlutterFirebaseMessagingUtils.remoteMessageToMap(remoteMessage);
-      });
+          consumedInitialMessages.put(messageId, true);
+          return FlutterFirebaseMessagingUtils.remoteMessageToMap(remoteMessage);
+        });
   }
 
   @Override
@@ -312,21 +313,21 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver
       case "Messaging#startBackgroundIsolate":
         @SuppressWarnings("unchecked")
         long pluginCallbackHandle =
-          (long) ((Map<String, Object>) call.arguments).get("pluginCallbackHandle");
+            (long) ((Map<String, Object>) call.arguments).get("pluginCallbackHandle");
         @SuppressWarnings("unchecked")
         long userCallbackHandle =
-          (long) ((Map<String, Object>) call.arguments).get("userCallbackHandle");
+            (long) ((Map<String, Object>) call.arguments).get("userCallbackHandle");
 
         FlutterShellArgs shellArgs = null;
         if (mainActivity != null) {
           shellArgs =
-            ((io.flutter.embedding.android.FlutterActivity) mainActivity).getFlutterShellArgs();
+              ((io.flutter.embedding.android.FlutterActivity) mainActivity).getFlutterShellArgs();
         }
 
         FlutterFirebaseMessagingBackgroundService.setCallbackDispatcher(pluginCallbackHandle);
         FlutterFirebaseMessagingBackgroundService.setUserCallbackHandle(userCallbackHandle);
         FlutterFirebaseMessagingBackgroundService.startBackgroundIsolate(
-          pluginCallbackHandle, shellArgs);
+            pluginCallbackHandle, shellArgs);
         methodCallTask = initPush();
         break;
       case "Messaging#getInitialMessage":
@@ -344,29 +345,29 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver
       case "Messaging#unsubscribeFromTopic":
         methodCallTask = unsubscribeFromTopic(call.arguments());
         break;
-//      case "Messaging#sendMessage":
-//        methodCallTask = sendMessage(call.arguments());
-//        break;
-//      case "Messaging#setAutoInitEnabled":
-//        methodCallTask = setAutoInitEnabled(call.arguments());
-//        break;
+      //      case "Messaging#sendMessage":
+      //        methodCallTask = sendMessage(call.arguments());
+      //        break;
+      //      case "Messaging#setAutoInitEnabled":
+      //        methodCallTask = setAutoInitEnabled(call.arguments());
+      //        break;
       default:
         result.notImplemented();
         return;
     }
 
     methodCallTask.addOnCompleteListener(
-      task -> {
-        if (task.isSuccessful()) {
-          result.success(task.getResult());
-        } else {
-          Exception exception = task.getException();
-          result.error(
-            "firebase_messaging",
-            exception != null ? exception.getMessage() : null,
-            getExceptionDetails(exception));
-        }
-      });
+        task -> {
+          if (task.isSuccessful()) {
+            result.success(task.getResult());
+          } else {
+            Exception exception = task.getException();
+            result.error(
+                "firebase_messaging",
+                exception != null ? exception.getMessage() : null,
+                getExceptionDetails(exception));
+          }
+        });
   }
 
   private Map<String, Object> getExceptionDetails(@Nullable Exception exception) {
@@ -394,7 +395,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver
       return false;
     }
 
-    RemoteMessage remoteMessage = FlutterFirebaseMessagingReceiver.notifications.get(messageId);
+    PushRemoteMessage remoteMessage = FlutterFirebaseMessagingPlugin.notifications.get(messageId);
 
     // If we can't find a copy of the remote message in memory then check from our persisted store.
     if (remoteMessage == null) {
@@ -409,10 +410,10 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver
     // Store this message for later use by getInitialMessage.
     initialMessage = remoteMessage;
 
-    FlutterFirebaseMessagingReceiver.notifications.remove(messageId);
+    FlutterFirebaseMessagingPlugin.notifications.remove(messageId);
     channel.invokeMethod(
-      "Messaging#onMessageOpenedApp",
-      FlutterFirebaseMessagingUtils.remoteMessageToMap(remoteMessage));
+        "Messaging#onMessageOpenedApp",
+        FlutterFirebaseMessagingUtils.remoteMessageToMap(remoteMessage));
     mainActivity.setIntent(intent);
     return true;
   }
@@ -420,13 +421,13 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver
   @Override
   public Task<Map<String, Object>> getPluginConstantsForFirebaseApp(FirebaseApp firebaseApp) {
     return Tasks.call(
-      cachedThreadPool,
-      () -> {
-        Map<String, Object> constants = new HashMap<>();
-        FirebaseMessaging firebaseMessaging = FirebaseMessaging.getInstance();
-        constants.put("AUTO_INIT_ENABLED", firebaseMessaging.isAutoInitEnabled());
-        return constants;
-      });
+        cachedThreadPool,
+        () -> {
+          Map<String, Object> constants = new HashMap<>();
+          FirebaseMessaging firebaseMessaging = FirebaseMessaging.getInstance();
+          constants.put("AUTO_INIT_ENABLED", firebaseMessaging.isAutoInitEnabled());
+          return constants;
+        });
   }
 
   @Override

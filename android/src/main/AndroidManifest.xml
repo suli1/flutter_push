@@ -29,7 +29,7 @@
       android:permission="android.permission.BIND_JOB_SERVICE"
       android:exported="false" />
     <service
-      android:name=".core.receiver.FlutterFirebaseMessagingService"
+      android:name=".core.receiver.FcmMessagingService"
       android:exported="false">
       <intent-filter>
         <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -37,7 +37,7 @@
     </service>
 
     <receiver
-      android:name=".FlutterFirebaseMessagingReceiver"
+      android:name=".core.receiver.FcmMessagingReceiver"
       android:exported="true"
       android:permission="com.google.android.c2dm.permission.SEND">
       <intent-filter>
@@ -58,7 +58,7 @@
 
     <!-- Huawei Push配置 -->
     <service
-      android:name="io.flutter.plugins.firebase.messaging.core.receiver.HuaweiPushMessagingService"
+      android:name="io.flutter.plugins.firebase.messaging.core.receiver.HuaweiMessagingService"
       android:exported="false">
       <intent-filter>
         <action android:name="com.huawei.push.action.MESSAGING_EVENT"/>
@@ -107,7 +107,7 @@
     </receiver>
 
     <receiver
-      android:name="io.flutter.plugins.firebase.messaging.core.receiver.XiaomiPushMessagingReceiver"
+      android:name="io.flutter.plugins.firebase.messaging.core.receiver.XiaomiMessagingReceiver"
       android:exported="true">
       <intent-filter>
         <action android:name="com.xiaomi.mipush.RECEIVE_MESSAGE" />
@@ -129,7 +129,7 @@
       />
 
     <receiver
-      android:name="io.flutter.plugins.firebase.messaging.core.receiver.VivoPushMessagingReceiver">
+      android:name="io.flutter.plugins.firebase.messaging.core.receiver.VivoMessagingReceiver">
       <intent-filter>
         <action android:name="com.vivo.pushclient.action.RECEIVE" />
       </intent-filter>
