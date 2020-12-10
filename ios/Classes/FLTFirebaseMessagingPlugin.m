@@ -20,7 +20,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
   FlutterMethodChannel *_channel;
   NSObject<FlutterPluginRegistrar> *_registrar;
   NSDictionary *_initialNotification;
-
 #ifdef __FF_NOTIFICATIONS_SUPPORTED_PLATFORM
   API_AVAILABLE(ios(10), macosx(10.14))
   __weak id<UNUserNotificationCenterDelegate> _originalNotificationCenterDelegate;
@@ -34,25 +33,16 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
 }
 
 #pragma mark - FlutterPlugin
-
 - (instancetype)initWithFlutterMethodChannel:(FlutterMethodChannel *)channel
                    andFlutterPluginRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
   self = [super init];
   if (self) {
     _channel = channel;
     _registrar = registrar;
-
-    // Application
-    // Dart -> `getInitialNotification`
-    // ObjC -> Initialize other delegates & observers
     [[NSNotificationCenter defaultCenter]
         addObserver:self
            selector:@selector(application_onDidFinishLaunchingNotification:)
-#if TARGET_OS_OSX
-               name:NSApplicationDidFinishLaunchingNotification
-#else
                name:UIApplicationDidFinishLaunchingNotification
-#endif
              object:nil];
   }
   return self;
@@ -68,9 +58,7 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
   [[FLTFirebasePluginRegistry sharedInstance] registerFirebasePlugin:instance];
 
   [registrar addMethodCallDelegate:instance channel:channel];
-#if !TARGET_OS_OSX
-  [registrar publish:instance];  // iOS only supported
-#endif
+
 }
 
 - (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)flutterResult {
@@ -116,7 +104,9 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
                                            withMethodCallResult:methodCallResult];
   }
   if ([@"Messaging#getToken" isEqualToString:call.method]) {
-    [self messagingGetToken:call.arguments withMethodCallResult:methodCallResult];
+//    [self messagingGetToken:call.arguments withMethodCallResult:methodCallResult];
+      [self messagingGetAPNSToken:call.arguments withMethodCallResult:methodCallResult];
+
   } else if ([@"Messaging#getNotificationSettings" isEqualToString:call.method]) {
     if (@available(iOS 10, macOS 10.14, *)) {
       [self messagingGetNotificationSettings:call.arguments withMethodCallResult:methodCallResult];
@@ -170,10 +160,13 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
   if (fcmToken == nil) {
     return;
   }
-
+   
+  NSData *apnsToken = [FIRMessaging messaging].APNSToken;
+  NSString * tokenStr = [FLTFirebaseMessagingPlugin APNSTokenFromNSData:apnsToken];
+  [_channel invokeMethod:@"Messaging#onTokenRefresh" arguments:tokenStr];
+  /*
   // Send to Dart.
-  [_channel invokeMethod:@"Messaging#onTokenRefresh" arguments:fcmToken];
-
+  [_channel invokeMethod:@"Messaging#onTokenRefresh" arguments:tokenStr];
   // If the users AppDelegate implements messaging:didReceiveRegistrationToken: then call it as well
   // so we don't break other libraries.
   SEL messaging_didReceiveRegistrationTokenSelector =
@@ -186,6 +179,7 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
                                         messaging_didReceiveRegistrationTokenSelector, messaging,
                                         fcmToken);
   }
+  */
 }
 
 #pragma mark - NSNotificationCenter Observers
@@ -260,18 +254,8 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
       notificationCenter.delegate = strongSelf;
     }
   }
-
-  // We automatically register for remote notifications as
-  // application:didReceiveRemoteNotification:fetchCompletionHandler: will not get called unless
-  // registerForRemoteNotifications is called early on during app initialization, calling this from
-  // Dart would be too late.
-#if TARGET_OS_OSX
-  if (@available(macOS 10.14, *)) {
-    [[NSApplication sharedApplication] registerForRemoteNotifications];
-  }
-#else
   [[UIApplication sharedApplication] registerForRemoteNotifications];
-#endif
+
 }
 
 #pragma mark - UNUserNotificationCenter Delegate Methods
@@ -327,14 +311,15 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
     API_AVAILABLE(macos(10.14), ios(10.0)) {
   NSDictionary *remoteNotification = response.notification.request.content.userInfo;
   // We only want to handle FCM notifications.
-  if (remoteNotification[@"gcm.message_id"]) {
+  //MARK:此处消息类型需要修改  gcm.message_id 
+//  if (remoteNotification[@"gcm.message_id"]) {
     NSDictionary *notificationDict =
         [FLTFirebaseMessagingPlugin remoteMessageUserInfoToDict:remoteNotification];
     [_channel invokeMethod:@"Messaging#onMessageOpenedApp" arguments:notificationDict];
     @synchronized(self) {
       _initialNotification = notificationDict;
     }
-  }
+//  }
 
   // Forward on to any other delegates.
   if (_originalNotificationCenterDelegate != nil &&
@@ -367,14 +352,9 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
 
 #pragma mark - AppDelegate Methods
 
-#if TARGET_OS_OSX
-// Called when `registerForRemoteNotifications` completes successfully.
-- (void)application:(NSApplication *)application
-    didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-#else
 - (void)application:(UIApplication *)application
     didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-#endif
+  
 #ifdef DEBUG
   [[FIRMessaging messaging] setAPNSToken:deviceToken type:FIRMessagingAPNSTokenTypeSandbox];
 #else
@@ -382,39 +362,11 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
 #endif
 }
 
-#if TARGET_OS_OSX
-// Called when `registerForRemoteNotifications` fails to complete.
-- (void)application:(NSApplication *)application
-    didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-#else
 - (void)application:(UIApplication *)application
     didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-#endif
+    
   NSLog(@"%@", error.localizedDescription);
 }
-
-// Called when a remote notification is received via APNs.
-#if TARGET_OS_OSX
-- (void)application:(NSApplication *)application
-    didReceiveRemoteNotification:(NSDictionary *)userInfo {
-#if __has_include(<FirebaseAuth/FirebaseAuth.h>)
-  if ([[FIRAuth auth] canHandleNotification:userInfo]) {
-    return YES;
-  }
-#endif
-  // Only handle notifications from FCM.
-  if (userInfo[@"gcm.message_id"]) {
-    NSDictionary *notificationDict =
-        [FLTFirebaseMessagingPlugin remoteMessageUserInfoToDict:userInfo];
-
-    if ([NSApplication sharedApplication].isActive) {
-      [_channel invokeMethod:@"Messaging#onMessage" arguments:notificationDict];
-    } else {
-      [_channel invokeMethod:@"Messaging#onBackgroundMessage" arguments:notificationDict];
-    }
-  }
-}
-#endif
 
 #if !TARGET_OS_OSX
 - (BOOL)application:(UIApplication *)application
@@ -426,7 +378,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
     return YES;
   }
 #endif
-
   // Only handle notifications from FCM.
   if (userInfo[@"gcm.message_id"]) {
     NSDictionary *notificationDict =
@@ -491,7 +442,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
 #endif
 
 #pragma mark - Firebase Messaging API
-
 - (void)messagingUnsubscribeFromTopic:(id)arguments
                  withMethodCallResult:(FLTFirebaseMethodCallResult *)result {
   FIRMessaging *messaging = [FIRMessaging messaging];
@@ -536,7 +486,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
   UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
 
   UNAuthorizationOptions options = UNAuthorizationOptionNone;
-
   if ([permissions[@"alert"] isEqual:@(YES)]) {
     options |= UNAuthorizationOptionAlert;
   }
@@ -616,13 +565,14 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
 - (void)messagingGetAPNSToken:(id)arguments
          withMethodCallResult:(FLTFirebaseMethodCallResult *)result {
   NSData *apnsToken = [FIRMessaging messaging].APNSToken;
+  NSString * tokenStr = [FLTFirebaseMessagingPlugin APNSTokenFromNSData:apnsToken];
   if (apnsToken) {
-    result.success(@{@"token" : [FLTFirebaseMessagingPlugin APNSTokenFromNSData:apnsToken]});
+    result.success(@{@"token" : tokenStr});
   } else {
     result.success(@{@"token" : [NSNull null]});
   }
 }
-
+#pragma mark -- 该token，在国内需要翻墙，才能获取
 - (void)messagingDeleteToken:(id)arguments
         withMethodCallResult:(FLTFirebaseMethodCallResult *)result {
   FIRMessaging *messaging = [FIRMessaging messaging];
@@ -770,7 +720,7 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
 #endif
   return [self remoteMessageUserInfoToDict:notification.request.content.userInfo];
 }
-
+#pragma mark ---- 推送消息解析和转换，此处涉及业务相关代码
 + (NSDictionary *)remoteMessageUserInfoToDict:(NSDictionary *)userInfo {
   NSMutableDictionary *message = [[NSMutableDictionary alloc] init];
   NSMutableDictionary *data = [[NSMutableDictionary alloc] init];
