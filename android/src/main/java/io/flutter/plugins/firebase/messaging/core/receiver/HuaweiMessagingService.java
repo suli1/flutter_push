@@ -29,6 +29,7 @@ public class HuaweiMessagingService extends HmsMessageService {
   @Override
   public void onMessageReceived(RemoteMessage remoteMessage) {
     super.onMessageReceived(remoteMessage);
+    LogUtils.d("HMS onMessageReceived:" + remoteMessage.getNotification().getTitle());
     FlutterFirebaseMessagingUtils.sendMessageBroadcast(getApplicationContext(), PushRemoteMessage.buildFromHuawei(remoteMessage));
   }
 

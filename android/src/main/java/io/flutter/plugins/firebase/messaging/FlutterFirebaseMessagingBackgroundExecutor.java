@@ -11,8 +11,15 @@ import android.content.res.AssetManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
-import com.google.firebase.messaging.RemoteMessage;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
@@ -24,12 +31,8 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugins.firebase.messaging.core.FlutterFirebaseMessagingUtils;
+import io.flutter.plugins.firebase.messaging.core.PushRemoteMessage;
 import io.flutter.view.FlutterCallbackInformation;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * An background execution abstraction which handles initializing a background isolate running a
@@ -254,7 +257,7 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
     }
 
     // Handle the message event in Dart.
-    RemoteMessage remoteMessage =
+    PushRemoteMessage remoteMessage =
         intent.getParcelableExtra(FlutterFirebaseMessagingUtils.EXTRA_REMOTE_MESSAGE);
     if (remoteMessage != null) {
       Map<String, Object> remoteMessageMap =
@@ -294,7 +297,9 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
     prefs.edit().putLong(USER_CALLBACK_HANDLE_KEY, callbackHandle).apply();
   }
 
-  /** Get the registered Dart callback handle for the messaging plugin. Returns 0 if not set. */
+  /**
+   * Get the registered Dart callback handle for the messaging plugin. Returns 0 if not set.
+   */
   private long getPluginCallbackHandle() {
     SharedPreferences prefs =
         ContextHolder.getApplicationContext()

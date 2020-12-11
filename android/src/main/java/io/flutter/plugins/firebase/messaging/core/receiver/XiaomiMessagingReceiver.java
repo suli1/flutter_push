@@ -22,6 +22,7 @@ public class XiaomiMessagingReceiver extends PushMessageReceiver {
 
   @Override
   public void onReceivePassThroughMessage(Context context, MiPushMessage message) {
+    LogUtils.d("xiaomi through message arrived:" + message.getTitle());
     FlutterFirebaseMessagingUtils.sendMessageBroadcast(context, PushRemoteMessage.buildFromXiaomi(message));
   }
 
@@ -32,6 +33,7 @@ public class XiaomiMessagingReceiver extends PushMessageReceiver {
 
   @Override
   public void onNotificationMessageArrived(Context context, MiPushMessage message) {
+    LogUtils.d("xiaomi notification message arrived:" + message.getTitle());
     FlutterFirebaseMessagingUtils.sendMessageBroadcast(context, PushRemoteMessage.buildFromXiaomi(message));
   }
 
