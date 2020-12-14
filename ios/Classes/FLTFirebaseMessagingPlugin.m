@@ -378,8 +378,8 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
     return YES;
   }
 #endif
-  // Only handle notifications from FCM.
-  if (userInfo[@"gcm.message_id"]) {
+  //MARK: Only handle notifications from FCM. gcm.message_id去掉判断
+//  if (userInfo[@"gcm.message_id"]) {
     NSDictionary *notificationDict =
         [FLTFirebaseMessagingPlugin remoteMessageUserInfoToDict:userInfo];
 
@@ -436,8 +436,8 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
     }
 
     return YES;
-  }  // if (userInfo[@"gcm.message_id"])
-  return NO;
+//  }  // if (userInfo[@"gcm.message_id"])
+//  return NO;
 }  // didReceiveRemoteNotification
 #endif
 
@@ -721,6 +721,14 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
   return [self remoteMessageUserInfoToDict:notification.request.content.userInfo];
 }
 #pragma mark ---- 推送消息解析和转换，此处涉及业务相关代码
++ (NSDictionary *)myRemoteMessageUserInfoToDict:(NSDictionary *)userInfo {
+  NSMutableDictionary *message = [[NSMutableDictionary alloc] init];
+  NSMutableDictionary *data = [[NSMutableDictionary alloc] init];
+  NSMutableDictionary *notification = [[NSMutableDictionary alloc] init];
+  NSMutableDictionary *notificationIOS = [[NSMutableDictionary alloc] init];
+  
+  return  message;
+}
 + (NSDictionary *)remoteMessageUserInfoToDict:(NSDictionary *)userInfo {
   NSMutableDictionary *message = [[NSMutableDictionary alloc] init];
   NSMutableDictionary *data = [[NSMutableDictionary alloc] init];
