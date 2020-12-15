@@ -11,12 +11,13 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import io.flutter.plugins.firebase.messaging.core.FlutterFirebaseMessagingUtils;
 import io.flutter.plugins.firebase.messaging.core.LogUtils;
+import io.flutter.plugins.firebase.messaging.core.PushType;
 
 public class FcmMessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String token) {
         LogUtils.d("FMC onNewToken:" + token);
-        FlutterFirebaseMessagingUtils.sendTokenBroadcast(getApplicationContext(), token);
+        FlutterFirebaseMessagingUtils.sendTokenBroadcast(getApplicationContext(), token, PushType.FCM);
     }
 
     @Override

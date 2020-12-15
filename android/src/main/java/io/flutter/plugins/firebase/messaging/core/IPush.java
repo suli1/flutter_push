@@ -13,6 +13,8 @@ public interface IPush {
 
   Context getContext();
 
+  PushType getType();
+
   void register();
 
   void unregister();

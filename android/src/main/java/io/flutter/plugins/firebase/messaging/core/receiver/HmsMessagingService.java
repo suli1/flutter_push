@@ -6,17 +6,18 @@ import com.huawei.hms.push.RemoteMessage;
 import io.flutter.plugins.firebase.messaging.core.FlutterFirebaseMessagingUtils;
 import io.flutter.plugins.firebase.messaging.core.LogUtils;
 import io.flutter.plugins.firebase.messaging.core.PushRemoteMessage;
+import io.flutter.plugins.firebase.messaging.core.PushType;
 
 /**
  * Created by suli on 2020/12/7
  **/
-public class HuaweiMessagingService extends HmsMessageService {
+public class HmsMessagingService extends HmsMessageService {
 
   @Override
   public void onNewToken(String token) {
     super.onNewToken(token);
     LogUtils.d("HMS onNewToken:" + token);
-    FlutterFirebaseMessagingUtils.sendTokenBroadcast(getApplicationContext(), token);
+    FlutterFirebaseMessagingUtils.sendTokenBroadcast(getApplicationContext(), token, PushType.HMS);
   }
 
   @Override

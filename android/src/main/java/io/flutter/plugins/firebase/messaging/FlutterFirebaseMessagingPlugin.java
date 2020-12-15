@@ -20,7 +20,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.RemoteMessage;
 import com.heytap.msp.push.HeytapPushManager;
 
 import java.util.HashMap;
@@ -151,7 +150,11 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
 
     if (action.equals(FlutterFirebaseMessagingUtils.ACTION_TOKEN)) {
       String token = intent.getStringExtra(FlutterFirebaseMessagingUtils.EXTRA_TOKEN);
-      channel.invokeMethod("Messaging#onTokenRefresh", token);
+      String pushType = intent.getStringExtra(FlutterFirebaseMessagingUtils.EXTRA_PUSH_TYPE);
+      Map<String, Object> resultMap = new HashMap<>();
+      resultMap.put("token", token);
+      resultMap.put("type", pushType);
+      channel.invokeMethod("Messaging#onTokenRefresh", resultMap);
     } else if (action.equals(FlutterFirebaseMessagingUtils.ACTION_REMOTE_MESSAGE)) {
       PushRemoteMessage message = intent.getParcelableExtra(FlutterFirebaseMessagingUtils.EXTRA_REMOTE_MESSAGE);
       if (message == null) return;
@@ -167,7 +170,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
           HeytapPushManager.init(applicationContext, LogUtils.debuggable);
           PushType pushType = FlutterFirebaseMessagingUtils.getSupportedPush(applicationContext);
           if (pushType == null) {
-            pushType = PushType.XIAOMI;
+            pushType = PushType.XIAO_MI;
           }
           LogUtils.d("Support push type:" + pushType.name());
 
@@ -190,7 +193,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
             case VIVO:
               pushClient = new VivoPush(pushConfig);
               break;
-            case XIAOMI: {
+            case XIAO_MI: {
               Bundle metaData = applicationContext.getPackageManager()
                   .getApplicationInfo(applicationContext.getPackageName(),
                       PackageManager.GET_META_DATA).metaData;
@@ -199,7 +202,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
               pushClient = new XiaomiPush(pushConfig);
               break;
             }
-            case HUAWEI:
+            case HMS:
               pushClient = new HuaweiPush(pushConfig);
               break;
             default:
@@ -224,10 +227,11 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
         cachedThreadPool,
         () -> {
           String token = pushClient.getToken();
-          LogUtils.d("Get push token:" + token);
+          String pushType = pushClient.getType().name();
           return new HashMap<String, Object>() {
             {
               put("token", token);
+              put("type", pushType);
             }
           };
         });

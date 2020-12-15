@@ -13,6 +13,7 @@ import java.util.List;
 import io.flutter.plugins.firebase.messaging.core.FlutterFirebaseMessagingUtils;
 import io.flutter.plugins.firebase.messaging.core.LogUtils;
 import io.flutter.plugins.firebase.messaging.core.PushRemoteMessage;
+import io.flutter.plugins.firebase.messaging.core.PushType;
 
 /**
  * Created by suli on 2020/12/7
@@ -47,7 +48,7 @@ public class XiaomiMessagingReceiver extends PushMessageReceiver {
       if (message.getResultCode() == ErrorCode.SUCCESS) {
         mRegId = cmdArg1;
         LogUtils.d("Xiaomi onNewToken:" + mRegId);
-        FlutterFirebaseMessagingUtils.sendTokenBroadcast(context, mRegId);
+        FlutterFirebaseMessagingUtils.sendTokenBroadcast(context, mRegId, PushType.XIAO_MI);
       }
     } else if (MiPushClient.COMMAND_SET_ALIAS.equals(command)) {
       if (message.getResultCode() == ErrorCode.SUCCESS) {
@@ -82,7 +83,7 @@ public class XiaomiMessagingReceiver extends PushMessageReceiver {
       if (message.getResultCode() == ErrorCode.SUCCESS) {
         mRegId = cmdArg1;
         LogUtils.d("xiaomi onNewToken:" + mRegId);
-        FlutterFirebaseMessagingUtils.sendTokenBroadcast(context, mRegId);
+        FlutterFirebaseMessagingUtils.sendTokenBroadcast(context, mRegId, PushType.XIAO_MI);
       }
     }
   }

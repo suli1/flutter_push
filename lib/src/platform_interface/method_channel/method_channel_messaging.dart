@@ -9,6 +9,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/src/platform_interface/message_token.dart';
 import 'package:firebase_messaging/src/platform_interface/platform_interface/platform_interface_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -78,7 +79,11 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
     channel.setMethodCallHandler((MethodCall call) async {
       switch (call.method) {
         case "Messaging#onTokenRefresh":
-          _tokenStreamController.add(call.arguments as String);
+          Map<String, dynamic> map = call.arguments as Map<String, dynamic>;
+          _tokenStreamController.add(MessageToken(
+            type: map['type'],
+            token: map['token'],
+          ));
           break;
         case "Messaging#onMessage":
           print(call.arguments);
@@ -129,8 +134,8 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
     'plugins.flutter.io/firebase_messaging',
   );
 
-  final StreamController<String> _tokenStreamController =
-      StreamController<String>.broadcast();
+  final StreamController<MessageToken> _tokenStreamController =
+      StreamController<MessageToken>.broadcast();
 
   @override
   FirebaseMessagingPlatform delegateFor({FirebaseApp app}) {
@@ -216,16 +221,17 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
   }
 
   @override
-  Future<String> getToken({
+  Future<MessageToken> getToken({
     String senderId,
     String vapidKey, // not used yet; web only property
   }) async {
     try {
-      return (await channel
-          .invokeMapMethod<String, String>('Messaging#getToken', {
+      Map<String, dynamic> result =
+          (await channel.invokeMapMethod<String, String>('Messaging#getToken', {
         'appName': app.name,
         'senderId': senderId,
-      }))['token'];
+      }));
+      return MessageToken(type: result['type'], token: result['token']);
     } catch (e) {
       throw convertPlatformException(e);
     }
@@ -300,7 +306,7 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
   }
 
   @override
-  Stream<String> get onTokenRefresh {
+  Stream<MessageToken> get onTokenRefresh {
     return _tokenStreamController.stream;
   }
 

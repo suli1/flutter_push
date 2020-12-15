@@ -16,12 +16,12 @@ class TokenMonitor extends StatefulWidget {
 
 class _TokenMonitor extends State<TokenMonitor> {
   String _token;
-  Stream<String> _tokenStream;
+  Stream<MessageToken> _tokenStream;
 
-  void setToken(String token) {
-    print('FCM Token: $token');
+  void setToken(MessageToken token) {
+    print('FCM Token: ${token.token}');
     setState(() {
-      _token = token;
+      _token = token.token;
     });
   }
 

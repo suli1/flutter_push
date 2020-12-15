@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/src/platform_interface/message_token.dart';
 import 'package:meta/meta.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
@@ -171,7 +172,7 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
   }
 
   /// Returns the default FCM token for this device and optionally [senderId].
-  Future<String> getToken({
+  Future<MessageToken> getToken({
     String senderId,
     String vapidKey,
   }) {
@@ -179,7 +180,7 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
   }
 
   /// Fires when a new FCM token is generated.
-  Stream<String> get onTokenRefresh {
+  Stream<MessageToken> get onTokenRefresh {
     throw UnimplementedError('onTokenRefresh is not implemented');
   }
 

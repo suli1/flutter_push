@@ -58,7 +58,7 @@
 
     <!-- Huawei Push配置 -->
     <service
-      android:name="io.flutter.plugins.firebase.messaging.core.receiver.HuaweiMessagingService"
+      android:name="io.flutter.plugins.firebase.messaging.core.receiver.HmsMessagingService"
       android:exported="false">
       <intent-filter>
         <action android:name="com.huawei.push.action.MESSAGING_EVENT"/>

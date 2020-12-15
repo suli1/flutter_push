@@ -32,29 +32,6 @@ class FirebaseMessaging extends FirebasePluginPlatform {
     return FirebaseMessaging._(app: Firebase.app());
   }
 
-  /// Returns an instance using a specified [FirebaseApp]
-  ///
-  /// If [app] is not provided, the default Firebase app will be used.
-  // TODO: messaging does not yet support multiple Firebase Apps. Default app only.
-  // static FirebaseMessaging instanceFor({
-  //   FirebaseApp app,
-  // }) {
-  //   app ??= Firebase.app();
-  //   assert(app != null);
-  //
-  //   String key = '${app.name}';
-  //   if (_cachedInstances.containsKey(key)) {
-  //     return _cachedInstances[key];
-  //   }
-  //
-  //   FirebaseMessaging newInstance = FirebaseMessaging._(app: app);
-  //   _cachedInstances[key] = newInstance;
-  //
-  //   return newInstance;
-  // }
-  //
-  // static final Map<String, FirebaseMessaging> _cachedInstances = {};
-
   /// Returns a Stream that is called when an incoming FCM payload is received whilst
   /// the Flutter instance is in the foreground.
   ///
@@ -146,7 +123,7 @@ class FirebaseMessaging extends FirebasePluginPlatform {
   }
 
   /// Returns the default FCM token for this device and optionally a [senderId].
-  Future<String> getToken({
+  Future<MessageToken> getToken({
     String vapidKey,
   }) {
     return _delegate.getToken(
@@ -155,7 +132,7 @@ class FirebaseMessaging extends FirebasePluginPlatform {
   }
 
   /// Fires when a new FCM token is generated.
-  Stream<String> get onTokenRefresh {
+  Stream<MessageToken> get onTokenRefresh {
     return _delegate.onTokenRefresh;
   }
 

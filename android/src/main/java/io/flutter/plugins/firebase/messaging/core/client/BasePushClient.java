@@ -5,6 +5,7 @@ import android.content.Context;
 import io.flutter.plugins.firebase.messaging.ContextHolder;
 import io.flutter.plugins.firebase.messaging.core.IPush;
 import io.flutter.plugins.firebase.messaging.core.PushConfig;
+import io.flutter.plugins.firebase.messaging.core.PushType;
 
 /**
  * Created by suli on 2020/12/7
@@ -19,5 +20,10 @@ abstract class BasePushClient implements IPush {
   @Override
   public Context getContext() {
     return ContextHolder.getApplicationContext();
+  }
+
+  @Override
+  public PushType getType() {
+    return config.type;
   }
 }

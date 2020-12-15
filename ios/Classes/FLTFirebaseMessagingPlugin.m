@@ -163,7 +163,7 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
    
   NSData *apnsToken = [FIRMessaging messaging].APNSToken;
   NSString * tokenStr = [FLTFirebaseMessagingPlugin APNSTokenFromNSData:apnsToken];
-  [_channel invokeMethod:@"Messaging#onTokenRefresh" arguments:tokenStr];
+    [_channel invokeMethod:@"Messaging#onTokenRefresh" arguments:@{@"token":tokenStr,@"type":@"APNS"}];
   /*
   // Send to Dart.
   [_channel invokeMethod:@"Messaging#onTokenRefresh" arguments:tokenStr];
@@ -567,7 +567,7 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
   NSData *apnsToken = [FIRMessaging messaging].APNSToken;
   NSString * tokenStr = [FLTFirebaseMessagingPlugin APNSTokenFromNSData:apnsToken];
   if (apnsToken) {
-    result.success(@{@"token" : tokenStr});
+      result.success(@{@"token" : tokenStr, @"type" : @"APNS"});
   } else {
     result.success(@{@"token" : [NSNull null]});
   }

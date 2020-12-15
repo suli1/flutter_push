@@ -37,6 +37,7 @@ public class FlutterFirebaseMessagingUtils {
   public static final String EXTRA_REMOTE_MESSAGE = "notification";
   public static final String ACTION_TOKEN = "io.flutter.plugins.firebase.messaging.TOKEN";
   public static final String EXTRA_TOKEN = "token";
+  public static final String EXTRA_PUSH_TYPE = "pushType";
   public static final int JOB_ID = 2020;
 
   private static final String KEY_COLLAPSE_KEY = "collapseKey";
@@ -53,11 +54,11 @@ public class FlutterFirebaseMessagingUtils {
     if (HeytapPushManager.isSupportPush()) {
       return PushType.OPPO;
     } else if (RomUtils.isEmui()) {
-      return PushType.HUAWEI;
+      return PushType.HMS;
     } else if (PushClient.getInstance(context).isSupport()) {
       return PushType.VIVO;
     } else if (RomUtils.isMiui()) {
-      return PushType.XIAOMI;
+      return PushType.XIAO_MI;
     } else if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == 0) {
       return PushType.FCM;
     } else {
@@ -65,9 +66,10 @@ public class FlutterFirebaseMessagingUtils {
     }
   }
 
-  public static void sendTokenBroadcast(Context context, String token) {
+  public static void sendTokenBroadcast(Context context, String token, PushType pushType) {
     Intent onMessageIntent = new Intent(FlutterFirebaseMessagingUtils.ACTION_TOKEN);
     onMessageIntent.putExtra(FlutterFirebaseMessagingUtils.EXTRA_TOKEN, token);
+    onMessageIntent.putExtra(FlutterFirebaseMessagingUtils.EXTRA_PUSH_TYPE, pushType.name());
     LocalBroadcastManager.getInstance(context).sendBroadcast(onMessageIntent);
   }
 

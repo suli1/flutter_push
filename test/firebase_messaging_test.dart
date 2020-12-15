@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:async/async.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_messaging/src/platform_interface/message_token.dart';
 import 'package:firebase_messaging/src/platform_interface/platform_interface/platform_interface_messaging.dart';
 import 'package:firebase_messaging/src/platform_interface/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -110,11 +111,16 @@ void main() {
         const token = 'test-token';
 
         when(kMockMessagingPlatform.onTokenRefresh)
-            .thenAnswer((_) => Stream<String>.fromIterable(<String>[token]));
+            .thenAnswer((_) => Stream<MessageToken>.fromIterable(<MessageToken>[
+                  MessageToken(
+                    type: 'APNS',
+                    token: token,
+                  )
+                ]));
 
-        final StreamQueue<String> changes =
-            StreamQueue<String>(messaging.onTokenRefresh);
-        expect(await changes.next, isA<String>());
+        final StreamQueue<MessageToken> changes =
+            StreamQueue<MessageToken>(messaging.onTokenRefresh);
+        expect(await changes.next, isA<MessageToken>());
 
         verify(kMockMessagingPlatform.onTokenRefresh);
       });
