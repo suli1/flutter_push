@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:async/async.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:firebase_messaging_platform_interface/firebase_messaging_platform_interface.dart';
-import 'package:firebase_messaging_platform_interface/src/utils.dart';
+import 'package:firebase_messaging/src/platform_interface/platform_interface/platform_interface_messaging.dart';
+import 'package:firebase_messaging/src/platform_interface/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 

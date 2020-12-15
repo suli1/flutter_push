@@ -9,23 +9,16 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart'
     show FirebasePluginPlatform;
-import 'package:firebase_messaging_platform_interface/firebase_messaging_platform_interface.dart';
+import 'package:firebase_messaging/src/platform_interface/ios_notification_settings.dart';
+import 'package:firebase_messaging/src/platform_interface/notification_settings.dart';
+import 'package:firebase_messaging/src/platform_interface/platform_interface/platform_interface_messaging.dart';
+import 'package:firebase_messaging/src/platform_interface/remote_message.dart';
+import 'package:firebase_messaging/src/platform_interface/types.dart';
 
-export 'package:firebase_messaging_platform_interface/firebase_messaging_platform_interface.dart'
-    show
-        BackgroundMessageHandler,
-        AppleShowPreviewSetting,
-        AppleNotification,
-        AppleNotificationSetting,
-        AppleNotificationSound,
-        AuthorizationStatus,
-        NotificationSettings,
-        // ignore: deprecated_member_use, deprecated_member_use_from_same_package
-        IosNotificationSettings,
-        AndroidNotification,
-        AndroidNotificationPriority,
-        AndroidNotificationVisibility,
-        RemoteMessage,
-        RemoteNotification;
+export 'package:firebase_messaging/src/platform_interface/ios_notification_settings.dart';
+export 'package:firebase_messaging/src/platform_interface/notification_settings.dart';
+export 'package:firebase_messaging/src/platform_interface/remote_message.dart';
+export 'package:firebase_messaging/src/platform_interface/remote_notification.dart';
+export 'package:firebase_messaging/src/platform_interface/types.dart';
 
 part 'src/messaging.dart';
