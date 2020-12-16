@@ -16,7 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.flutter.plugins.firebase.messaging.core.FlutterFirebaseMessagingUtils;
+import io.flutter.plugins.firebase.messaging.core.FlutterMessagingUtils;
 import io.flutter.plugins.firebase.messaging.core.PushRemoteMessage;
 
 public class FlutterFirebaseMessagingStore {
@@ -53,7 +53,7 @@ public class FlutterFirebaseMessagingStore {
 
   public void storeFirebaseMessage(PushRemoteMessage remoteMessage) {
     String remoteMessageString =
-        new JSONObject(FlutterFirebaseMessagingUtils.remoteMessageToMap(remoteMessage)).toString();
+        new JSONObject(FlutterMessagingUtils.remoteMessageToMap(remoteMessage)).toString();
     setPreferencesStringValue(remoteMessage.messageId, remoteMessageString);
 
     // Save new notification id.
@@ -83,7 +83,7 @@ public class FlutterFirebaseMessagingStore {
         // Add a fake 'to' - as it's required to construct a RemoteMessage instance.
         messageOutMap.put("to", remoteMessageId);
         argumentsMap.put("message", messageOutMap);
-        return FlutterFirebaseMessagingUtils.getRemoteMessageForArguments(argumentsMap);
+        return FlutterMessagingUtils.getRemoteMessageForArguments(argumentsMap);
       } catch (JSONException e) {
         e.printStackTrace();
       }

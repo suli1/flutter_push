@@ -121,8 +121,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
       // Defaults handled in Dart.
       methodCallResult.success(@{});
     }
-  } else if ([@"Messaging#setAutoInitEnabled" isEqualToString:call.method]) {
-    [self messagingSetAutoInitEnabled:call.arguments withMethodCallResult:methodCallResult];
   } else if ([@"Messaging#subscribeToTopic" isEqualToString:call.method]) {
     [self messagingSubscribeToTopic:call.arguments withMethodCallResult:methodCallResult];
   } else if ([@"Messaging#unsubscribeFromTopic" isEqualToString:call.method]) {
@@ -468,15 +466,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
                        result.success(nil);
                      }
                    }];
-}
-
-- (void)messagingSetAutoInitEnabled:(id)arguments
-               withMethodCallResult:(FLTFirebaseMethodCallResult *)result {
-  FIRMessaging *messaging = [FIRMessaging messaging];
-  messaging.autoInitEnabled = [arguments[@"enabled"] boolValue];
-  result.success(@{
-    @"isAutoInitEnabled" : @(messaging.isAutoInitEnabled),
-  });
 }
 
 - (void)messagingRequestPermission:(id)arguments

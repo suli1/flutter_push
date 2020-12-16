@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
-import io.flutter.plugins.firebase.messaging.core.FlutterFirebaseMessagingUtils;
+import io.flutter.plugins.firebase.messaging.core.FlutterMessagingUtils;
 import io.flutter.plugins.firebase.messaging.core.PushConfig;
 
 /**
@@ -48,7 +48,7 @@ public class FcmPush extends BasePushClient {
   @Override
   public void subscribeToTopic(Map<String, Object> arguments) throws ExecutionException, InterruptedException {
     FirebaseMessaging firebaseMessaging =
-      FlutterFirebaseMessagingUtils.getFirebaseMessagingForArguments(arguments);
+      FlutterMessagingUtils.getFirebaseMessagingForArguments(arguments);
     String topic = (String) Objects.requireNonNull(arguments.get("topic"));
     Tasks.await(firebaseMessaging.subscribeToTopic(topic));
   }
@@ -56,7 +56,7 @@ public class FcmPush extends BasePushClient {
   @Override
   public void unsubscribeFromTopic(Map<String, Object> arguments) throws ExecutionException, InterruptedException {
     FirebaseMessaging firebaseMessaging =
-      FlutterFirebaseMessagingUtils.getFirebaseMessagingForArguments(arguments);
+      FlutterMessagingUtils.getFirebaseMessagingForArguments(arguments);
     String topic = (String) Objects.requireNonNull(arguments.get("topic"));
     Tasks.await(firebaseMessaging.unsubscribeFromTopic(topic));
   }

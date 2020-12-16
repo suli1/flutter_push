@@ -30,7 +30,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugins.firebase.messaging.core.FlutterFirebaseMessagingUtils;
+import io.flutter.plugins.firebase.messaging.core.FlutterMessagingUtils;
 import io.flutter.plugins.firebase.messaging.core.PushRemoteMessage;
 import io.flutter.view.FlutterCallbackInformation;
 
@@ -74,7 +74,7 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
   public static void setCallbackDispatcher(long callbackHandle) {
     Context context = ContextHolder.getApplicationContext();
     SharedPreferences prefs =
-        context.getSharedPreferences(FlutterFirebaseMessagingUtils.SHARED_PREFERENCES_KEY, 0);
+        context.getSharedPreferences(FlutterMessagingUtils.SHARED_PREFERENCES_KEY, 0);
     prefs.edit().putLong(CALLBACK_HANDLE_KEY, callbackHandle).apply();
   }
 
@@ -258,10 +258,10 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
 
     // Handle the message event in Dart.
     PushRemoteMessage remoteMessage =
-        intent.getParcelableExtra(FlutterFirebaseMessagingUtils.EXTRA_REMOTE_MESSAGE);
+        intent.getParcelableExtra(FlutterMessagingUtils.EXTRA_REMOTE_MESSAGE);
     if (remoteMessage != null) {
       Map<String, Object> remoteMessageMap =
-          FlutterFirebaseMessagingUtils.remoteMessageToMap(remoteMessage);
+          FlutterMessagingUtils.remoteMessageToMap(remoteMessage);
       backgroundChannel.invokeMethod(
           "MessagingBackground#onMessage",
           new HashMap<String, Object>() {
@@ -282,7 +282,7 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
   private long getUserCallbackHandle() {
     SharedPreferences prefs =
         ContextHolder.getApplicationContext()
-            .getSharedPreferences(FlutterFirebaseMessagingUtils.SHARED_PREFERENCES_KEY, 0);
+            .getSharedPreferences(FlutterMessagingUtils.SHARED_PREFERENCES_KEY, 0);
     return prefs.getLong(USER_CALLBACK_HANDLE_KEY, 0);
   }
 
@@ -293,7 +293,7 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
   public static void setUserCallbackHandle(long callbackHandle) {
     Context context = ContextHolder.getApplicationContext();
     SharedPreferences prefs =
-        context.getSharedPreferences(FlutterFirebaseMessagingUtils.SHARED_PREFERENCES_KEY, 0);
+        context.getSharedPreferences(FlutterMessagingUtils.SHARED_PREFERENCES_KEY, 0);
     prefs.edit().putLong(USER_CALLBACK_HANDLE_KEY, callbackHandle).apply();
   }
 
@@ -303,7 +303,7 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
   private long getPluginCallbackHandle() {
     SharedPreferences prefs =
         ContextHolder.getApplicationContext()
-            .getSharedPreferences(FlutterFirebaseMessagingUtils.SHARED_PREFERENCES_KEY, 0);
+            .getSharedPreferences(FlutterMessagingUtils.SHARED_PREFERENCES_KEY, 0);
     return prefs.getLong(CALLBACK_HANDLE_KEY, 0);
   }
 

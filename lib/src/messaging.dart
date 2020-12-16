@@ -87,11 +87,6 @@ class FirebaseMessaging extends FirebasePluginPlatform {
     return FirebaseMessaging.instance;
   }
 
-  /// Returns whether messaging auto initialization is enabled or disabled for the device.
-  bool get isAutoInitEnabled {
-    return _delegate.isAutoInitEnabled;
-  }
-
   /// If the application has been opened from a terminated state via a [RemoteMessage]
   /// (containing a [Notification]), it will be returned, otherwise it will be `null`.
   ///
@@ -326,13 +321,6 @@ class FirebaseMessaging extends FirebasePluginPlatform {
     } catch (e) {
       return false;
     }
-  }
-
-  /// Determine whether FCM auto-initialization is enabled or disabled.
-  @Deprecated(
-      "autoInitEnabled() is deprecated. Use [isAutoInitEnabled] instead")
-  Future<bool> autoInitEnabled() async {
-    return isAutoInitEnabled;
   }
 }
 

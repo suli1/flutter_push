@@ -36,14 +36,6 @@ void runInstanceTests() {
       });
     });
 
-    group('setAutoInitEnabled()', () {
-      test('sets the value', () async {
-        expect(messaging.isAutoInitEnabled, isTrue);
-        await messaging.setAutoInitEnabled(false);
-        expect(messaging.isAutoInitEnabled, isFalse);
-      });
-    });
-
     group('requestPermission', () {
       test(
           'authorizationStatus returns AuthorizationStatus.authorized on Android',
@@ -112,21 +104,6 @@ void runInstanceTests() {
         expect(testInstance, isA<FirebaseMessaging>());
         expect(testInstance.app, isA<FirebaseApp>());
         expect(testInstance.app.name, defaultFirebaseAppName);
-      });
-    });
-
-    group('autoInitEnabled (deprecated)', () {
-      test('returns correct value', () async {
-        // should now be false due to previous setAutoInitEnabled test.
-        expect(messaging.isAutoInitEnabled, isFalse);
-        // ignore: deprecated_member_use
-        expect(await messaging.autoInitEnabled(), messaging.isAutoInitEnabled);
-
-        await messaging.setAutoInitEnabled(true);
-
-        expect(messaging.isAutoInitEnabled, isTrue);
-        // ignore: deprecated_member_use
-        expect(await messaging.autoInitEnabled(), messaging.isAutoInitEnabled);
       });
     });
   });

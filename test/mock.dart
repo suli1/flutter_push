@@ -50,10 +50,6 @@ setupFirebaseMessagingMocks() {
   // ignore: invalid_use_of_protected_member
   when(kMockMessagingPlatform.delegateFor(app: anyNamed("app")))
       .thenReturn(kMockMessagingPlatform);
-  // ignore: invalid_use_of_protected_member
-  when(kMockMessagingPlatform.setInitialValues(
-    isAutoInitEnabled: anyNamed("isAutoInitEnabled"),
-  )).thenReturn(kMockMessagingPlatform);
 }
 
 // Platform Interface Mock Classes

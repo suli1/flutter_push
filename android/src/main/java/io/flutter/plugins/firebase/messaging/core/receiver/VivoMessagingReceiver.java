@@ -5,7 +5,7 @@ import android.content.Context;
 import com.vivo.push.model.UPSNotificationMessage;
 import com.vivo.push.sdk.OpenClientPushMessageReceiver;
 
-import io.flutter.plugins.firebase.messaging.core.FlutterFirebaseMessagingUtils;
+import io.flutter.plugins.firebase.messaging.core.FlutterMessagingUtils;
 import io.flutter.plugins.firebase.messaging.core.LogUtils;
 import io.flutter.plugins.firebase.messaging.core.PushType;
 
@@ -19,7 +19,7 @@ public class VivoMessagingReceiver extends OpenClientPushMessageReceiver {
   @Override
   public void onReceiveRegId(Context context, String regId) {
     LogUtils.d("Vivo onNewToken:" + regId);
-    FlutterFirebaseMessagingUtils.sendTokenBroadcast(context, regId, PushType.VIVO);
+    FlutterMessagingUtils.sendTokenBroadcast(context, regId, PushType.VIVO);
   }
 
   @Override

@@ -2,7 +2,6 @@ package io.flutter.plugins.firebase.messaging.core;
 
 import android.content.Context;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 

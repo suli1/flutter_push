@@ -3,7 +3,7 @@ package io.flutter.plugins.firebase.messaging.core.receiver;
 import com.huawei.hms.push.HmsMessageService;
 import com.huawei.hms.push.RemoteMessage;
 
-import io.flutter.plugins.firebase.messaging.core.FlutterFirebaseMessagingUtils;
+import io.flutter.plugins.firebase.messaging.core.FlutterMessagingUtils;
 import io.flutter.plugins.firebase.messaging.core.LogUtils;
 import io.flutter.plugins.firebase.messaging.core.PushRemoteMessage;
 import io.flutter.plugins.firebase.messaging.core.PushType;
@@ -17,7 +17,7 @@ public class HmsMessagingService extends HmsMessageService {
   public void onNewToken(String token) {
     super.onNewToken(token);
     LogUtils.d("HMS onNewToken:" + token);
-    FlutterFirebaseMessagingUtils.sendTokenBroadcast(getApplicationContext(), token, PushType.HMS);
+    FlutterMessagingUtils.sendTokenBroadcast(getApplicationContext(), token, PushType.HMS);
   }
 
   @Override
@@ -31,7 +31,7 @@ public class HmsMessagingService extends HmsMessageService {
   public void onMessageReceived(RemoteMessage remoteMessage) {
     super.onMessageReceived(remoteMessage);
     LogUtils.d("HMS onMessageReceived:" + remoteMessage.getNotification().getTitle());
-    FlutterFirebaseMessagingUtils.sendMessageBroadcast(getApplicationContext(), PushRemoteMessage.buildFromHuawei(remoteMessage));
+    FlutterMessagingUtils.sendMessageBroadcast(getApplicationContext(), PushRemoteMessage.buildFromHuawei(remoteMessage));
   }
 
 }

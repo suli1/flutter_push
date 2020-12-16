@@ -11,7 +11,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
 import io.flutter.embedding.engine.FlutterShellArgs;
-import io.flutter.plugins.firebase.messaging.core.FlutterFirebaseMessagingUtils;
+import io.flutter.plugins.firebase.messaging.core.FlutterMessagingUtils;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -34,7 +34,7 @@ public class FlutterFirebaseMessagingBackgroundService extends JobIntentService 
     enqueueWork(
         context,
         FlutterFirebaseMessagingBackgroundService.class,
-        FlutterFirebaseMessagingUtils.JOB_ID,
+        FlutterMessagingUtils.JOB_ID,
         messageIntent);
   }
 

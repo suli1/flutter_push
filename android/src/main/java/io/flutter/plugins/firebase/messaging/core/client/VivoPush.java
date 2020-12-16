@@ -8,7 +8,6 @@ import java.util.concurrent.ExecutionException;
 
 import io.flutter.plugins.firebase.messaging.core.LogUtils;
 import io.flutter.plugins.firebase.messaging.core.PushConfig;
-import io.flutter.plugins.firebase.messaging.core.client.BasePushClient;
 
 /**
  * Created by suli on 2020/12/7

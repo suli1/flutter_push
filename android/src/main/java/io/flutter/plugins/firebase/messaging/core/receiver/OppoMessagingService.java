@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.heytap.msp.push.callback.ICallBackResultService;
 
-import io.flutter.plugins.firebase.messaging.core.FlutterFirebaseMessagingUtils;
+import io.flutter.plugins.firebase.messaging.core.FlutterMessagingUtils;
 import io.flutter.plugins.firebase.messaging.core.LogUtils;
 import io.flutter.plugins.firebase.messaging.core.PushType;
 
@@ -21,7 +21,7 @@ public class OppoMessagingService implements ICallBackResultService {
   @Override
   public void onRegister(int responseCode, String registerId) {
     LogUtils.d("OPPO onNewToken:" + registerId);
-    FlutterFirebaseMessagingUtils.sendTokenBroadcast(context, registerId, PushType.OPPO);
+    FlutterMessagingUtils.sendTokenBroadcast(context, registerId, PushType.OPPO);
   }
 
   @Override

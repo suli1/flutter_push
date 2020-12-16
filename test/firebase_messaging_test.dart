@@ -36,26 +36,6 @@ void main() {
       });
     });
 
-    group('get.isAutoInitEnabled', () {
-      test('verify delegate method is called', () {
-        // verify isAutoInitEnabled returns true
-        when(kMockMessagingPlatform.isAutoInitEnabled).thenReturn(true);
-        var result = messaging.isAutoInitEnabled;
-
-        expect(result, isA<bool>());
-        expect(result, isTrue);
-        verify(kMockMessagingPlatform.isAutoInitEnabled);
-
-        // verify isAutoInitEnabled returns false
-        when(kMockMessagingPlatform.isAutoInitEnabled).thenReturn(false);
-        result = messaging.isAutoInitEnabled;
-
-        expect(result, isA<bool>());
-        expect(result, isFalse);
-        verify(kMockMessagingPlatform.isAutoInitEnabled);
-      });
-    });
-
     group('initialNotification', () {
       test('verify delegate method is called', () async {
         const senderId = 'test-notification';

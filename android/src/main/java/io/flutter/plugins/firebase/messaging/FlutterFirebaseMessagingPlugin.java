@@ -14,6 +14,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.gms.tasks.Task;
@@ -37,7 +38,7 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.NewIntentListener;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 import io.flutter.plugins.firebase.core.FlutterFirebasePlugin;
-import io.flutter.plugins.firebase.messaging.core.FlutterFirebaseMessagingUtils;
+import io.flutter.plugins.firebase.messaging.core.FlutterMessagingUtils;
 import io.flutter.plugins.firebase.messaging.core.IPush;
 import io.flutter.plugins.firebase.messaging.core.LogUtils;
 import io.flutter.plugins.firebase.messaging.core.PushConfig;
@@ -83,8 +84,8 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
 
     // Register broadcast receiver
     IntentFilter intentFilter = new IntentFilter();
-    intentFilter.addAction(FlutterFirebaseMessagingUtils.ACTION_TOKEN);
-    intentFilter.addAction(FlutterFirebaseMessagingUtils.ACTION_REMOTE_MESSAGE);
+    intentFilter.addAction(FlutterMessagingUtils.ACTION_TOKEN);
+    intentFilter.addAction(FlutterMessagingUtils.ACTION_REMOTE_MESSAGE);
     LocalBroadcastManager manager =
         LocalBroadcastManager.getInstance(ContextHolder.getApplicationContext());
     manager.registerReceiver(this, intentFilter);
@@ -148,17 +149,17 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
       return;
     }
 
-    if (action.equals(FlutterFirebaseMessagingUtils.ACTION_TOKEN)) {
-      String token = intent.getStringExtra(FlutterFirebaseMessagingUtils.EXTRA_TOKEN);
-      String pushType = intent.getStringExtra(FlutterFirebaseMessagingUtils.EXTRA_PUSH_TYPE);
+    if (action.equals(FlutterMessagingUtils.ACTION_TOKEN)) {
+      String token = intent.getStringExtra(FlutterMessagingUtils.EXTRA_TOKEN);
+      String pushType = intent.getStringExtra(FlutterMessagingUtils.EXTRA_PUSH_TYPE);
       Map<String, Object> resultMap = new HashMap<>();
       resultMap.put("token", token);
       resultMap.put("type", pushType);
       channel.invokeMethod("Messaging#onTokenRefresh", resultMap);
-    } else if (action.equals(FlutterFirebaseMessagingUtils.ACTION_REMOTE_MESSAGE)) {
-      PushRemoteMessage message = intent.getParcelableExtra(FlutterFirebaseMessagingUtils.EXTRA_REMOTE_MESSAGE);
+    } else if (action.equals(FlutterMessagingUtils.ACTION_REMOTE_MESSAGE)) {
+      PushRemoteMessage message = intent.getParcelableExtra(FlutterMessagingUtils.EXTRA_REMOTE_MESSAGE);
       if (message == null) return;
-      Map<String, Object> content = FlutterFirebaseMessagingUtils.remoteMessageToMap(message);
+      Map<String, Object> content = FlutterMessagingUtils.remoteMessageToMap(message);
       channel.invokeMethod("Messaging#onMessage", content);
     }
   }
@@ -168,7 +169,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
         cachedThreadPool,
         () -> {
           HeytapPushManager.init(applicationContext, LogUtils.debuggable);
-          PushType pushType = FlutterFirebaseMessagingUtils.getSupportedPush(applicationContext);
+          PushType pushType = FlutterMessagingUtils.getSupportedPush(applicationContext);
           if (pushType == null) {
             pushType = PushType.XIAO_MI;
           }
@@ -210,6 +211,23 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
           }
           pushClient.register();
           return null;
+        });
+  }
+
+  private Task<Map<String, Object>> requestPermission(Map<String, Object> arguments) {
+    return Tasks.call(
+        cachedThreadPool,
+        () -> {
+          boolean isEnabled = NotificationManagerCompat.from(applicationContext).areNotificationsEnabled();
+          if (pushClient.getType() == PushType.OPPO) {
+            LogUtils.d("HeytapPushManager.requestNotificationPermission");
+            HeytapPushManager.requestNotificationPermission();
+          }
+          return new HashMap<String, Object>() {
+            {
+              put("authorizationStatus", isEnabled ? 1 : 0);
+            }
+          };
         });
   }
 
@@ -261,7 +279,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
         () -> {
           if (initialMessage != null) {
             Map<String, Object> remoteMessageMap =
-                FlutterFirebaseMessagingUtils.remoteMessageToMap(initialMessage);
+                FlutterMessagingUtils.remoteMessageToMap(initialMessage);
             initialMessage = null;
             return remoteMessageMap;
           }
@@ -299,7 +317,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
           }
 
           consumedInitialMessages.put(messageId, true);
-          return FlutterFirebaseMessagingUtils.remoteMessageToMap(remoteMessage);
+          return FlutterMessagingUtils.remoteMessageToMap(remoteMessage);
         });
   }
 
@@ -316,11 +334,25 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
       // method channels.
       case "Messaging#startBackgroundIsolate":
         @SuppressWarnings("unchecked")
-        long pluginCallbackHandle =
-            (long) ((Map<String, Object>) call.arguments).get("pluginCallbackHandle");
-        @SuppressWarnings("unchecked")
-        long userCallbackHandle =
-            (long) ((Map<String, Object>) call.arguments).get("userCallbackHandle");
+        Map<String, Object> arguments = ((Map<String, Object>) call.arguments);
+
+        long pluginCallbackHandle;
+        long userCallbackHandle;
+
+        Object arg1 = arguments.get("pluginCallbackHandle");
+        Object arg2 = arguments.get("userCallbackHandle");
+
+        if (arg1 instanceof Long) {
+          pluginCallbackHandle = (Long) arg1;
+        } else {
+          pluginCallbackHandle = Long.valueOf((Integer) arg1);
+        }
+
+        if (arg2 instanceof Long) {
+          userCallbackHandle = (Long) arg2;
+        } else {
+          userCallbackHandle = Long.valueOf((Integer) arg2);
+        }
 
         FlutterShellArgs shellArgs = null;
         if (mainActivity != null) {
@@ -333,6 +365,9 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
         FlutterFirebaseMessagingBackgroundService.startBackgroundIsolate(
             pluginCallbackHandle, shellArgs);
         methodCallTask = initPush();
+        break;
+      case "Messaging#requestPermission":
+        methodCallTask = requestPermission(call.arguments());
         break;
       case "Messaging#getInitialMessage":
         methodCallTask = getInitialMessage(call.arguments());
@@ -351,9 +386,6 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
         break;
       //      case "Messaging#sendMessage":
       //        methodCallTask = sendMessage(call.arguments());
-      //        break;
-      //      case "Messaging#setAutoInitEnabled":
-      //        methodCallTask = setAutoInitEnabled(call.arguments());
       //        break;
       default:
         result.notImplemented();
@@ -417,7 +449,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
     FlutterFirebaseMessagingPlugin.notifications.remove(messageId);
     channel.invokeMethod(
         "Messaging#onMessageOpenedApp",
-        FlutterFirebaseMessagingUtils.remoteMessageToMap(remoteMessage));
+        FlutterMessagingUtils.remoteMessageToMap(remoteMessage));
     mainActivity.setIntent(intent);
     return true;
   }

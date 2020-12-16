@@ -30,8 +30,7 @@ import io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingBackgroundS
 import io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingPlugin;
 import io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingStore;
 
-public class FlutterFirebaseMessagingUtils {
-  public static final String IS_AUTO_INIT_ENABLED = "isAutoInitEnabled";
+public class FlutterMessagingUtils {
   public static final String SHARED_PREFERENCES_KEY = "io.flutter.firebase.messaging.callback";
   public static final String ACTION_REMOTE_MESSAGE = "io.flutter.plugins.firebase.messaging.NOTIFICATION";
   public static final String EXTRA_REMOTE_MESSAGE = "notification";
@@ -67,9 +66,9 @@ public class FlutterFirebaseMessagingUtils {
   }
 
   public static void sendTokenBroadcast(Context context, String token, PushType pushType) {
-    Intent onMessageIntent = new Intent(FlutterFirebaseMessagingUtils.ACTION_TOKEN);
-    onMessageIntent.putExtra(FlutterFirebaseMessagingUtils.EXTRA_TOKEN, token);
-    onMessageIntent.putExtra(FlutterFirebaseMessagingUtils.EXTRA_PUSH_TYPE, pushType.name());
+    Intent onMessageIntent = new Intent(FlutterMessagingUtils.ACTION_TOKEN);
+    onMessageIntent.putExtra(FlutterMessagingUtils.EXTRA_TOKEN, token);
+    onMessageIntent.putExtra(FlutterMessagingUtils.EXTRA_PUSH_TYPE, pushType.name());
     LocalBroadcastManager.getInstance(context).sendBroadcast(onMessageIntent);
   }
 
@@ -87,9 +86,9 @@ public class FlutterFirebaseMessagingUtils {
     //  |-> ---------------------
     //      App in Foreground
     //   ------------------------
-    if (FlutterFirebaseMessagingUtils.isApplicationForeground(context)) {
-      Intent onMessageIntent = new Intent(FlutterFirebaseMessagingUtils.ACTION_REMOTE_MESSAGE);
-      onMessageIntent.putExtra(FlutterFirebaseMessagingUtils.EXTRA_REMOTE_MESSAGE, remoteMessage);
+    if (FlutterMessagingUtils.isApplicationForeground(context)) {
+      Intent onMessageIntent = new Intent(FlutterMessagingUtils.ACTION_REMOTE_MESSAGE);
+      onMessageIntent.putExtra(FlutterMessagingUtils.EXTRA_REMOTE_MESSAGE, remoteMessage);
       LocalBroadcastManager.getInstance(context).sendBroadcast(onMessageIntent);
       return;
     }
@@ -100,7 +99,7 @@ public class FlutterFirebaseMessagingUtils {
     Intent onBackgroundMessageIntent =
         new Intent(context, FlutterFirebaseMessagingBackgroundService.class);
     onBackgroundMessageIntent.putExtra(
-        FlutterFirebaseMessagingUtils.EXTRA_REMOTE_MESSAGE, remoteMessage);
+        FlutterMessagingUtils.EXTRA_REMOTE_MESSAGE, remoteMessage);
     FlutterFirebaseMessagingBackgroundService.enqueueMessageProcessing(
         context, onBackgroundMessageIntent);
 

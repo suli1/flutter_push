@@ -111,8 +111,6 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
     _initialized = true;
   }
 
-  bool _autoInitEnabled;
-
   static bool _initialized = false;
   static bool _bgHandlerInitialized = false;
 
@@ -140,17 +138,6 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
   @override
   FirebaseMessagingPlatform delegateFor({FirebaseApp app}) {
     return MethodChannelFirebaseMessaging(app: app);
-  }
-
-  @override
-  FirebaseMessagingPlatform setInitialValues({bool isAutoInitEnabled}) {
-    _autoInitEnabled = isAutoInitEnabled ?? false;
-    return this;
-  }
-
-  @override
-  bool get isAutoInitEnabled {
-    return _autoInitEnabled;
   }
 
   @override
@@ -265,10 +252,10 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
       bool criticalAlert = false,
       bool provisional = false,
       bool sound = true}) async {
-    if (defaultTargetPlatform != TargetPlatform.iOS &&
-        defaultTargetPlatform != TargetPlatform.macOS) {
-      return androidNotificationSettings;
-    }
+    // if (defaultTargetPlatform != TargetPlatform.iOS &&
+    //     defaultTargetPlatform != TargetPlatform.macOS) {
+    //   return androidNotificationSettings;
+    // }
 
     try {
       Map<String, int> response = await channel
@@ -286,20 +273,6 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
       });
 
       return convertToNotificationSettings(response);
-    } catch (e) {
-      throw convertPlatformException(e);
-    }
-  }
-
-  @override
-  Future<void> setAutoInitEnabled(bool enabled) async {
-    try {
-      Map<String, dynamic> data = await channel
-          .invokeMapMethod<String, dynamic>('Messaging#setAutoInitEnabled', {
-        'appName': app.name,
-        'enabled': enabled,
-      });
-      _autoInitEnabled = data['isAutoInitEnabled'];
     } catch (e) {
       throw convertPlatformException(e);
     }

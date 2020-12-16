@@ -10,7 +10,7 @@ import com.xiaomi.mipush.sdk.PushMessageReceiver;
 
 import java.util.List;
 
-import io.flutter.plugins.firebase.messaging.core.FlutterFirebaseMessagingUtils;
+import io.flutter.plugins.firebase.messaging.core.FlutterMessagingUtils;
 import io.flutter.plugins.firebase.messaging.core.LogUtils;
 import io.flutter.plugins.firebase.messaging.core.PushRemoteMessage;
 import io.flutter.plugins.firebase.messaging.core.PushType;
@@ -24,7 +24,7 @@ public class XiaomiMessagingReceiver extends PushMessageReceiver {
   @Override
   public void onReceivePassThroughMessage(Context context, MiPushMessage message) {
     LogUtils.d("xiaomi through message arrived:" + message.getTitle());
-    FlutterFirebaseMessagingUtils.sendMessageBroadcast(context, PushRemoteMessage.buildFromXiaomi(message));
+    FlutterMessagingUtils.sendMessageBroadcast(context, PushRemoteMessage.buildFromXiaomi(message));
   }
 
   @Override
@@ -35,7 +35,7 @@ public class XiaomiMessagingReceiver extends PushMessageReceiver {
   @Override
   public void onNotificationMessageArrived(Context context, MiPushMessage message) {
     LogUtils.d("xiaomi notification message arrived:" + message.getTitle());
-    FlutterFirebaseMessagingUtils.sendMessageBroadcast(context, PushRemoteMessage.buildFromXiaomi(message));
+    FlutterMessagingUtils.sendMessageBroadcast(context, PushRemoteMessage.buildFromXiaomi(message));
   }
 
   @Override
@@ -48,7 +48,7 @@ public class XiaomiMessagingReceiver extends PushMessageReceiver {
       if (message.getResultCode() == ErrorCode.SUCCESS) {
         mRegId = cmdArg1;
         LogUtils.d("Xiaomi onNewToken:" + mRegId);
-        FlutterFirebaseMessagingUtils.sendTokenBroadcast(context, mRegId, PushType.XIAO_MI);
+        FlutterMessagingUtils.sendTokenBroadcast(context, mRegId, PushType.XIAO_MI);
       }
     } else if (MiPushClient.COMMAND_SET_ALIAS.equals(command)) {
       if (message.getResultCode() == ErrorCode.SUCCESS) {
@@ -83,7 +83,7 @@ public class XiaomiMessagingReceiver extends PushMessageReceiver {
       if (message.getResultCode() == ErrorCode.SUCCESS) {
         mRegId = cmdArg1;
         LogUtils.d("xiaomi onNewToken:" + mRegId);
-        FlutterFirebaseMessagingUtils.sendTokenBroadcast(context, mRegId, PushType.XIAO_MI);
+        FlutterMessagingUtils.sendTokenBroadcast(context, mRegId, PushType.XIAO_MI);
       }
     }
   }
