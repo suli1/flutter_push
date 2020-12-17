@@ -11,7 +11,7 @@ import io.flutter.plugins.firebase.messaging.BuildConfig;
  **/
 public class LogUtils {
   public final static boolean debuggable = BuildConfig.DEBUG;
-  private final static String TAG = "PushMessaging";
+  private final static String TAG = "PushMessagingPlugin";
 
   public static void d(String message) {
     Log.d(TAG, message);
