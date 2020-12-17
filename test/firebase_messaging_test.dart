@@ -5,11 +5,10 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:firebase_messaging/src/platform_interface/message_token.dart';
-import 'package:firebase_messaging/src/platform_interface/platform_interface/platform_interface_messaging.dart';
-import 'package:firebase_messaging/src/platform_interface/utils.dart';
+import 'package:flutter_push/firebase_messaging.dart';
+import 'package:flutter_push/src/platform_interface/message_token.dart';
+import 'package:flutter_push/src/platform_interface/platform_interface/platform_interface_messaging.dart';
+import 'package:flutter_push/src/platform_interface/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
@@ -21,7 +20,7 @@ void main() {
 
   group('$FirebaseMessaging', () {
     setUpAll(() async {
-      await Firebase.initializeApp();
+      // await Firebase.initializeApp();
       FirebaseMessagingPlatform.instance = kMockMessagingPlatform;
       messaging = FirebaseMessaging.instance;
     });
@@ -30,10 +29,10 @@ void main() {
         expect(messaging, isA<FirebaseMessaging>());
       });
 
-      test('returns the correct $FirebaseApp', () {
-        expect(messaging.app, isA<FirebaseApp>());
-        expect(messaging.app.name, defaultFirebaseAppName);
-      });
+      // test('returns the correct $FirebaseApp', () {
+      //   expect(messaging.app, isA<FirebaseApp>());
+      //   expect(messaging.app.name, defaultFirebaseAppName);
+      // });
     });
 
     group('initialNotification', () {
@@ -76,13 +75,11 @@ void main() {
     });
     group('getToken', () {
       test('verify delegate method is called with correct args', () async {
-        const vapidKey = 'test-vapid-key';
-        when(kMockMessagingPlatform.getToken(vapidKey: anyNamed('vapidKey')))
-            .thenReturn(null);
+        when(kMockMessagingPlatform.getToken()).thenReturn(null);
 
-        await messaging.getToken(vapidKey: vapidKey);
+        await messaging.getToken();
 
-        verify(kMockMessagingPlatform.getToken(vapidKey: vapidKey));
+        verify(kMockMessagingPlatform.getToken());
       });
     });
 
@@ -169,22 +166,6 @@ void main() {
       });
     });
 
-    group('setAutoInitEnabled', () {
-      test('verify delegate method is called with correct args', () async {
-        when(kMockMessagingPlatform.setAutoInitEnabled(any))
-            .thenAnswer((_) => null);
-
-        await messaging.setAutoInitEnabled(false);
-        verify(kMockMessagingPlatform.setAutoInitEnabled(false));
-
-        await messaging.setAutoInitEnabled(true);
-        verify(kMockMessagingPlatform.setAutoInitEnabled(true));
-      });
-
-      test('asserts [ttl] is more than 0 if not null', () {
-        expect(() => messaging.setAutoInitEnabled(null), throwsAssertionError);
-      });
-    });
     group('subscribeToTopic', () {
       setUpAll(() {
         when(kMockMessagingPlatform.subscribeToTopic(any))

@@ -1,4 +1,4 @@
-group 'io.flutter.plugins.firebasemessaging'
+group 'io.flutter.plugins.flutterpush'
 version '1.0-SNAPSHOT'
 
 buildscript {
@@ -18,7 +18,7 @@ rootProject.allprojects {
     jcenter()
     maven { url 'https://developer.huawei.com/repo/' }
     flatDir {
-      dirs project(':firebase_messaging').file('aars')
+      dirs project(':flutter_push').file('aars')
     }
   }
 }

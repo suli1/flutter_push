@@ -8,14 +8,13 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/src/platform_interface/message_token.dart';
-import 'package:firebase_messaging/src/platform_interface/platform_interface/platform_interface_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../message_token.dart';
 import '../notification_settings.dart';
+import '../platform_interface/platform_interface_messaging.dart';
 import '../remote_message.dart';
 import '../types.dart';
 import '../utils.dart';
@@ -31,7 +30,7 @@ void _firebaseMessagingCallbackDispatcher() {
   WidgetsFlutterBinding.ensureInitialized();
 
   const MethodChannel _channel = MethodChannel(
-    'plugins.flutter.io/firebase_messaging_background',
+    'plugins.flutter.io/flutter_push_background',
   );
 
   // This is where we handle background events from the native portion of the plugin.
@@ -74,7 +73,7 @@ void _firebaseMessagingCallbackDispatcher() {
 /// You can get an instance by calling [FirebaseMessaging.instance].
 class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
   /// Create an instance of [MethodChannelFirebaseMessaging] with optional [FirebaseApp]
-  MethodChannelFirebaseMessaging({FirebaseApp app}) : super(appInstance: app) {
+  MethodChannelFirebaseMessaging() : super() {
     if (_initialized) return;
     channel.setMethodCallHandler((MethodCall call) async {
       switch (call.method) {
@@ -124,29 +123,27 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
   ///
   /// When the user code calls an auth method, the real instance is
   /// then initialized via the [delegateFor] method.
-  MethodChannelFirebaseMessaging._() : super(appInstance: null);
+  MethodChannelFirebaseMessaging._() : super();
 
   /// The [MethodChannel] to which calls will be delegated.
   @visibleForTesting
   static const MethodChannel channel = MethodChannel(
-    'plugins.flutter.io/firebase_messaging',
+    'plugins.flutter.io/flutter_push',
   );
 
   final StreamController<MessageToken> _tokenStreamController =
       StreamController<MessageToken>.broadcast();
 
   @override
-  FirebaseMessagingPlatform delegateFor({FirebaseApp app}) {
-    return MethodChannelFirebaseMessaging(app: app);
+  FirebaseMessagingPlatform delegateFor() {
+    return MethodChannelFirebaseMessaging();
   }
 
   @override
   Future<RemoteMessage> getInitialMessage() async {
     try {
       Map<String, dynamic> remoteMessageMap = await channel
-          .invokeMapMethod<String, dynamic>('Messaging#getInitialMessage', {
-        'appName': app.name,
-      });
+          .invokeMapMethod<String, dynamic>('Messaging#getInitialMessage');
 
       if (remoteMessageMap == null) {
         return null;
@@ -179,12 +176,9 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
   }
 
   @override
-  Future<void> deleteToken({
-    String senderId,
-  }) async {
+  Future<void> deleteToken() async {
     try {
-      await channel.invokeMapMethod(
-          'Messaging#deleteToken', {'appName': app.name, 'senderId': senderId});
+      await channel.invokeMapMethod('Messaging#deleteToken');
     } catch (e) {
       throw convertPlatformException(e);
     }
@@ -199,25 +193,17 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
 
     try {
       return (await channel
-          .invokeMapMethod<String, String>('Messaging#getAPNSToken', {
-        'appName': app.name,
-      }))['token'];
+          .invokeMapMethod<String, String>('Messaging#getAPNSToken'))['token'];
     } catch (e) {
       throw convertPlatformException(e);
     }
   }
 
   @override
-  Future<MessageToken> getToken({
-    String senderId,
-    String vapidKey, // not used yet; web only property
-  }) async {
+  Future<MessageToken> getToken() async {
     try {
       Map<String, dynamic> result =
-          (await channel.invokeMapMethod<String, String>('Messaging#getToken', {
-        'appName': app.name,
-        'senderId': senderId,
-      }));
+          (await channel.invokeMapMethod<String, String>('Messaging#getToken'));
       return MessageToken(type: result['type'], token: result['token']);
     } catch (e) {
       throw convertPlatformException(e);
@@ -233,9 +219,7 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
 
     try {
       Map<String, int> response = await channel
-          .invokeMapMethod<String, int>('Messaging#getNotificationSettings', {
-        'appName': app.name,
-      });
+          .invokeMapMethod<String, int>('Messaging#getNotificationSettings');
 
       return convertToNotificationSettings(response);
     } catch (e) {
@@ -260,7 +244,6 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
     try {
       Map<String, int> response = await channel
           .invokeMapMethod<String, int>('Messaging#requestPermission', {
-        'appName': app.name,
         'permissions': <String, bool>{
           'alert': alert,
           'announcement': announcement,
@@ -297,7 +280,6 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
     try {
       await channel.invokeMapMethod(
           'Messaging#setForegroundNotificationPresentationOptions', {
-        'appName': app.name,
         'alert': alert,
         'badge': badge,
         'sound': sound,
@@ -308,39 +290,9 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
   }
 
   @override
-  Future<void> sendMessage({
-    String to,
-    Map<String, String> data,
-    String collapseKey,
-    String messageId,
-    String messageType,
-    int ttl,
-  }) async {
-    if (defaultTargetPlatform != TargetPlatform.android) {
-      throw UnimplementedError(
-          "Sending of messages from the Firebase Messaging SDK is only supported on Android devices.");
-    }
-
-    try {
-      await channel.invokeMapMethod('Messaging#sendMessage', {
-        'appName': app.name,
-        'to': to,
-        'data': data,
-        'collapseKey': collapseKey,
-        'messageId': messageId,
-        'messageType': messageType,
-        'ttl': ttl,
-      });
-    } catch (e) {
-      throw convertPlatformException(e);
-    }
-  }
-
-  @override
   Future<void> subscribeToTopic(String topic) async {
     try {
       await channel.invokeMapMethod('Messaging#subscribeToTopic', {
-        'appName': app.name,
         'topic': topic,
       });
     } catch (e) {
@@ -352,7 +304,6 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
   Future<void> unsubscribeFromTopic(String topic) async {
     try {
       await channel.invokeMapMethod('Messaging#unsubscribeFromTopic', {
-        'appName': app.name,
         'topic': topic,
       });
     } catch (e) {

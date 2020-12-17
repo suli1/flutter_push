@@ -2,12 +2,12 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-part of firebase_messaging;
+part of flutter_push;
 
 /// The [FirebaseMessaging] entry point.
 ///
 /// To get a new instance, call [FirebaseMessaging.instance].
-class FirebaseMessaging extends FirebasePluginPlatform {
+class FirebaseMessaging {
   // Cached and lazily loaded instance of [FirebaseMessagingPlatform] to avoid
   // creating a [MethodChannelFirebaseMessaging] when not needed or creating an
   // instance with the default app before a user specifies an app.
@@ -15,21 +15,16 @@ class FirebaseMessaging extends FirebasePluginPlatform {
 
   FirebaseMessagingPlatform get _delegate {
     if (_delegatePackingProperty == null) {
-      _delegatePackingProperty = FirebaseMessagingPlatform.instanceFor(
-          app: app, pluginConstants: pluginConstants);
+      _delegatePackingProperty = FirebaseMessagingPlatform.instanceFor();
     }
     return _delegatePackingProperty;
   }
 
-  /// The [FirebaseApp] for this current [FirebaseMessaging] instance.
-  FirebaseApp app;
-
-  FirebaseMessaging._({this.app})
-      : super(app.name, 'plugins.flutter.io/firebase_messaging');
+  FirebaseMessaging._();
 
   /// Returns an instance using the default [FirebaseApp].
   static FirebaseMessaging get instance {
-    return FirebaseMessaging._(app: Firebase.app());
+    return FirebaseMessaging._();
   }
 
   /// Returns a Stream that is called when an incoming FCM payload is received whilst
@@ -118,12 +113,8 @@ class FirebaseMessaging extends FirebasePluginPlatform {
   }
 
   /// Returns the default FCM token for this device and optionally a [senderId].
-  Future<MessageToken> getToken({
-    String vapidKey,
-  }) {
-    return _delegate.getToken(
-      vapidKey: vapidKey,
-    );
+  Future<MessageToken> getToken() {
+    return _delegate.getToken();
   }
 
   /// Fires when a new FCM token is generated.
@@ -229,35 +220,6 @@ class FirebaseMessaging extends FirebasePluginPlatform {
 
     return status == AuthorizationStatus.authorized ||
         status == AuthorizationStatus.provisional;
-  }
-
-  /// Send a new [RemoteMessage] to the FCM server. Android only.
-  Future<void> sendMessage({
-    String to,
-    Map<String, String> data,
-    String collapseKey,
-    String messageId,
-    String messageType,
-    int ttl,
-  }) {
-    assert(to != null);
-    if (ttl != null) {
-      assert(ttl >= 0);
-    }
-    return _delegate.sendMessage(
-      to: to ?? '${app.options.messagingSenderId}@fcm.googleapis.com',
-      data: data,
-      collapseKey: collapseKey,
-      messageId: messageId,
-      messageType: messageType,
-      ttl: ttl,
-    );
-  }
-
-  /// Enable or disable auto-initialization of Firebase Cloud Messaging.
-  Future<void> setAutoInitEnabled(bool enabled) async {
-    assert(enabled != null);
-    return _delegate.setAutoInitEnabled(enabled);
   }
 
   /// Sets the presentation options for Apple notifications when received in

@@ -47,7 +47,7 @@ public class XiaomiMessagingReceiver extends PushMessageReceiver {
     if (MiPushClient.COMMAND_REGISTER.equals(command)) {
       if (message.getResultCode() == ErrorCode.SUCCESS) {
         mRegId = cmdArg1;
-        LogUtils.d("Xiaomi onNewToken:" + mRegId);
+        LogUtils.d("xiaomi onCommandResult newToken:" + mRegId);
         FlutterMessagingUtils.sendTokenBroadcast(context, mRegId, PushType.XIAO_MI);
       }
     } else if (MiPushClient.COMMAND_SET_ALIAS.equals(command)) {
@@ -82,7 +82,7 @@ public class XiaomiMessagingReceiver extends PushMessageReceiver {
     if (MiPushClient.COMMAND_REGISTER.equals(command)) {
       if (message.getResultCode() == ErrorCode.SUCCESS) {
         mRegId = cmdArg1;
-        LogUtils.d("xiaomi onNewToken:" + mRegId);
+        LogUtils.d("xiaomi onReceiveRegisterResult newToken:" + mRegId);
         FlutterMessagingUtils.sendTokenBroadcast(context, mRegId, PushType.XIAO_MI);
       }
     }

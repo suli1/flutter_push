@@ -1,8 +1,8 @@
-name: firebase_messaging
-description: Flutter plugin for Firebase Cloud Messaging, a cross-platform
+name: flutter_push
+description: Flutter plugin for FCM, HMS, xiaomi, VIVO, OPPO, a cross-platform
   messaging solution that lets you reliably deliver messages on Android and iOS.
-homepage: https://github.com/FirebaseExtended/flutterfire/tree/master/packages/firebase_messaging
-version: 8.0.0-dev.9
+homepage: https://github.com/suli1/flutter_push
+version: 1.0.0-dev.1
 
 flutter:
   plugin:
@@ -12,13 +12,10 @@ flutter:
         pluginClass: FlutterFirebaseMessagingPlugin
       ios:
         pluginClass: FLTFirebaseMessagingPlugin
-      macos:
-        pluginClass: FLTFirebaseMessagingPlugin
 
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^0.5.2+1
 dev_dependencies:
   pedantic: ^1.8.0
   flutter_test:

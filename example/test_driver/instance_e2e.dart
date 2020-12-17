@@ -5,7 +5,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_push/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -23,18 +23,18 @@ void runInstanceTests() {
 
     tearDownAll(() {});
 
-    test('instance', () {
-      expect(messaging, isA<FirebaseMessaging>());
-      expect(messaging.app, isA<FirebaseApp>());
-      expect(messaging.app.name, defaultFirebaseAppName);
-    });
-
-    group('app', () {
-      test('accessible from messaging.app', () {
-        expect(messaging.app, isA<FirebaseApp>());
-        expect(messaging.app.name, app.name);
-      });
-    });
+    // test('instance', () {
+    //   expect(messaging, isA<FirebaseMessaging>());
+    //   expect(messaging.app, isA<FirebaseApp>());
+    //   expect(messaging.app.name, defaultFirebaseAppName);
+    // });
+    //
+    // group('app', () {
+    //   test('accessible from messaging.app', () {
+    //     expect(messaging.app, isA<FirebaseApp>());
+    //     expect(messaging.app.name, app.name);
+    //   });
+    // });
 
     group('requestPermission', () {
       test(
@@ -93,17 +93,6 @@ void runInstanceTests() {
       test('successfully unsubscribes from topic', () async {
         final topic = 'test-topic';
         await messaging.unsubscribeFromTopic(topic);
-      });
-    });
-
-    // deprecated methods
-    group('FirebaseMessaging (deprecated)', () {
-      test('returns an instance with the current [FirebaseApp]', () async {
-        // ignore: deprecated_member_use
-        final testInstance = FirebaseMessaging();
-        expect(testInstance, isA<FirebaseMessaging>());
-        expect(testInstance.app, isA<FirebaseApp>());
-        expect(testInstance.app.name, defaultFirebaseAppName);
       });
     });
   });

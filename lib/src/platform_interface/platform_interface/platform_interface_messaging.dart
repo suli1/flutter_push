@@ -4,11 +4,10 @@
 
 import 'dart:async';
 
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/src/platform_interface/message_token.dart';
 import 'package:meta/meta.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+import '../message_token.dart';
 import '../method_channel/method_channel_messaging.dart';
 import '../notification_settings.dart';
 import '../remote_message.dart';
@@ -16,29 +15,22 @@ import '../types.dart';
 
 /// Defines an interface to work with Messaging on web and mobile.
 abstract class FirebaseMessagingPlatform extends PlatformInterface {
-  /// The [FirebaseApp] this instance was initialized with.
-  @protected
-  final FirebaseApp appInstance;
+  FirebaseMessagingPlatform() : super(token: _token);
 
-  /// Create an instance using [app].
-  FirebaseMessagingPlatform({this.appInstance}) : super(token: _token);
-
-  /// Returns the [FirebaseApp] for the current instance.
-  FirebaseApp get app {
-    if (appInstance == null) {
-      return Firebase.app();
-    }
-
-    return appInstance;
-  }
+  // /// Returns the [FirebaseApp] for the current instance.
+  // FirebaseApp get app {
+  //   if (appInstance == null) {
+  //     return Firebase.app();
+  //   }
+  //
+  //   return appInstance;
+  // }
 
   static final Object _token = Object();
 
   /// Create an instance with a [FirebaseApp] using an existing instance.
-  factory FirebaseMessagingPlatform.instanceFor(
-      {FirebaseApp app, Map<dynamic, dynamic> pluginConstants}) {
-    return FirebaseMessagingPlatform.instance
-        .delegateFor(app: app);
+  factory FirebaseMessagingPlatform.instanceFor() {
+    return FirebaseMessagingPlatform.instance.delegateFor();
   }
 
   static FirebaseMessagingPlatform _instance;
@@ -110,7 +102,7 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
   /// Enables delegates to create new instances of themselves if a none default
   /// [FirebaseApp] instance is required by the user.
   @protected
-  FirebaseMessagingPlatform delegateFor({FirebaseApp app}) {
+  FirebaseMessagingPlatform delegateFor() {
     throw UnimplementedError('delegateFor() is not implemented');
   }
 
@@ -139,9 +131,7 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
   /// Removes access to an FCM token previously authorized with optional [senderId].
   ///
   /// Messages sent by the server to this token will fail.
-  Future<void> deleteToken({
-    String senderId,
-  }) {
+  Future<void> deleteToken() {
     throw UnimplementedError('deleteToken() is not implemented');
   }
 
@@ -151,11 +141,8 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
     throw UnimplementedError('getAPNSToken() is not implemented');
   }
 
-  /// Returns the default FCM token for this device and optionally [senderId].
-  Future<MessageToken> getToken({
-    String senderId,
-    String vapidKey,
-  }) {
+  /// Returns the default Push token for this device
+  Future<MessageToken> getToken() {
     throw UnimplementedError('getToken() is not implemented');
   }
 
@@ -232,11 +219,6 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
     throw UnimplementedError('requestPermission() is not implemented');
   }
 
-  /// Enable or disable auto-initialization of Firebase Cloud Messaging.
-  Future<void> setAutoInitEnabled(bool enabled) async {
-    throw UnimplementedError('setAutoInitEnabled() is not implemented');
-  }
-
   /// Sets the presentation options for iOS based notifications when received in
   /// the foreground.
   ///
@@ -263,18 +245,6 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
   }) {
     throw UnimplementedError(
         'setForegroundNotificationPresentationOptions() is not implemented');
-  }
-
-  /// Send a new [RemoteMessage] to the FCM server.
-  Future<void> sendMessage({
-    String to,
-    Map<String, String> data,
-    String collapseKey,
-    String messageId,
-    String messageType,
-    int ttl,
-  }) {
-    throw UnimplementedError('sendMessage() is not implemented');
   }
 
   /// Subscribe to topic in background.
