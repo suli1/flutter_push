@@ -315,7 +315,7 @@ public class FlutterFirebaseMessagingBackgroundExecutor implements MethodCallHan
     // This channel is also responsible for sending requests from Android to Dart to execute Dart
     // callbacks in the background isolate.
     backgroundChannel =
-        new MethodChannel(isolate, "plugins.flutter.io/firebase_messaging_background");
+        new MethodChannel(isolate, "plugins.flutter.io/flutter_push_background");
     backgroundChannel.setMethodCallHandler(this);
   }
 }

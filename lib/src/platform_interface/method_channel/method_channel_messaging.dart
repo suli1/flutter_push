@@ -30,7 +30,7 @@ void _firebaseMessagingCallbackDispatcher() {
   WidgetsFlutterBinding.ensureInitialized();
 
   const MethodChannel _channel = MethodChannel(
-    'plugins.flutter.io/firebase_messaging_background',
+    'plugins.flutter.io/flutter_push_background',
   );
 
   // This is where we handle background events from the native portion of the plugin.
@@ -128,7 +128,7 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
   /// The [MethodChannel] to which calls will be delegated.
   @visibleForTesting
   static const MethodChannel channel = MethodChannel(
-    'plugins.flutter.io/firebase_messaging',
+    'plugins.flutter.io/flutter_push',
   );
 
   final StreamController<MessageToken> _tokenStreamController =

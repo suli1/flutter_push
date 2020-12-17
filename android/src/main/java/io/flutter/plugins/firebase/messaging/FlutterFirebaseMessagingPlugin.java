@@ -78,7 +78,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
   }
 
   private void initInstance(BinaryMessenger messenger) {
-    String channelName = "plugins.flutter.io/firebase_messaging";
+    String channelName = "plugins.flutter.io/flutter_push";
     channel = new MethodChannel(messenger, channelName);
     channel.setMethodCallHandler(this);
 
