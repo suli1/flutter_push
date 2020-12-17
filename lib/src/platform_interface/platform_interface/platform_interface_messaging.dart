@@ -4,10 +4,10 @@
 
 import 'dart:async';
 
-import 'package:firebase_messaging/src/platform_interface/message_token.dart';
 import 'package:meta/meta.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+import '../message_token.dart';
 import '../method_channel/method_channel_messaging.dart';
 import '../notification_settings.dart';
 import '../remote_message.dart';

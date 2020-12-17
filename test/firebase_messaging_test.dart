@@ -5,10 +5,10 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:firebase_messaging/src/platform_interface/message_token.dart';
-import 'package:firebase_messaging/src/platform_interface/platform_interface/platform_interface_messaging.dart';
-import 'package:firebase_messaging/src/platform_interface/utils.dart';
+import 'package:flutter_push/firebase_messaging.dart';
+import 'package:flutter_push/src/platform_interface/message_token.dart';
+import 'package:flutter_push/src/platform_interface/platform_interface/platform_interface_messaging.dart';
+import 'package:flutter_push/src/platform_interface/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 

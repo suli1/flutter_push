@@ -1,4 +1,4 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_push/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 /// Manages & returns the users FCM token.

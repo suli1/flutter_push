@@ -8,13 +8,13 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:firebase_messaging/src/platform_interface/message_token.dart';
-import 'package:firebase_messaging/src/platform_interface/platform_interface/platform_interface_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../message_token.dart';
 import '../notification_settings.dart';
+import '../platform_interface/platform_interface_messaging.dart';
 import '../remote_message.dart';
 import '../types.dart';
 import '../utils.dart';
