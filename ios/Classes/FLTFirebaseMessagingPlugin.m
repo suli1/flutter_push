@@ -183,33 +183,9 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
 #pragma mark - NSNotificationCenter Observers
 
 - (void)application_onDidFinishLaunchingNotification:(nonnull NSNotification *)notification {
-  // Setup UIApplicationDelegate.
-#if TARGET_OS_OSX
-  // For macOS we use swizzling to intercept as addApplicationDelegate does not exist on the macOS
-  // registrar Flutter implementation.
-  [GULAppDelegateSwizzler registerAppDelegateInterceptor:self];
-  [GULAppDelegateSwizzler proxyOriginalDelegateIncludingAPNSMethods];
 
-  SEL didReceiveRemoteNotificationWithCompletionSEL =
-      NSSelectorFromString(@"application:didReceiveRemoteNotification:fetchCompletionHandler:");
-  if ([[GULAppDelegateSwizzler sharedApplication].delegate
-          respondsToSelector:didReceiveRemoteNotificationWithCompletionSEL]) {
-    // noop - user has own implementation of this method in their AppDelegate, this
-    // means GULAppDelegateSwizzler will have already replaced it with a donor method
-  } else {
-    // add our own donor implementation of
-    // application:didReceiveRemoteNotification:fetchCompletionHandler:
-    Method donorMethod = class_getInstanceMethod(object_getClass(self),
-                                                 didReceiveRemoteNotificationWithCompletionSEL);
-    class_addMethod(object_getClass([GULAppDelegateSwizzler sharedApplication].delegate),
-                    didReceiveRemoteNotificationWithCompletionSEL,
-                    method_getImplementation(donorMethod), method_getTypeEncoding(donorMethod));
-  }
-#else
   [_registrar addApplicationDelegate:self];
-#endif
-
-  // Set UNUserNotificationCenter but preserve original delegate if necessary.
+  
   if (@available(iOS 10.0, macOS 10.14, *)) {
     BOOL shouldReplaceDelegate = YES;
     UNUserNotificationCenter *notificationCenter =
@@ -230,7 +206,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
         shouldReplaceDelegate = NO;
       }
 #endif
-
       if (shouldReplaceDelegate) {
         _originalNotificationCenterDelegate = notificationCenter.delegate;
         _originalNotificationCenterDelegateRespondsTo.openSettingsForNotification =
@@ -362,10 +337,8 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
 
 - (void)application:(UIApplication *)application
     didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-    
   NSLog(@"%@", error.localizedDescription);
 }
-
 #if !TARGET_OS_OSX
 - (BOOL)application:(UIApplication *)application
     didReceiveRemoteNotification:(NSDictionary *)userInfo
@@ -384,8 +357,7 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
     if ([UIApplication sharedApplication].applicationState == UIApplicationStateBackground) {
       __block BOOL completed = NO;
 
-      // If app is in background state, register background task to guarantee async queues aren't
-      // frozen.
+      // If app is in background state, register background task to guarantee async queues aren't frozen.
       UIBackgroundTaskIdentifier __block backgroundTaskId =
           [application beginBackgroundTaskWithExpirationHandler:^{
             @synchronized(self) {
@@ -535,22 +507,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
   }];
 }
 
-- (void)messagingGetToken:(id)arguments withMethodCallResult:(FLTFirebaseMethodCallResult *)result {
-  FIRMessaging *messaging = [FIRMessaging messaging];
-  NSString *senderId = arguments[@"senderId"];
-  if ([senderId isEqual:[NSNull null]]) {
-    senderId = [FIRApp defaultApp].options.GCMSenderID;
-  }
-  [messaging retrieveFCMTokenForSenderID:senderId
-                              completion:^(NSString *token, NSError *error) {
-                                if (error != nil) {
-                                  result.error(nil, nil, nil, error);
-                                } else {
-                                  result.success(@{@"token" : token});
-                                }
-                              }];
-}
-
 - (void)messagingGetAPNSToken:(id)arguments
          withMethodCallResult:(FLTFirebaseMethodCallResult *)result {
   NSData *apnsToken = [FIRMessaging messaging].APNSToken;
@@ -580,7 +536,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
 }
 
 #pragma mark - FLTFirebasePlugin
-
 - (void)didReinitializeFirebaseCore:(void (^)(void))completion {
   completion();
 }
@@ -604,7 +559,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
 }
 
 #pragma mark - Utilities
-
 + (NSDictionary *)NSDictionaryFromUNNotificationSettings:(UNNotificationSettings *_Nonnull)settings
     API_AVAILABLE(ios(10), macos(10.14)) {
   NSMutableDictionary *settingsDictionary = [NSMutableDictionary dictionary];
@@ -639,9 +593,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCSimplifyInspectionLegacy"
   if (@available(iOS 13.0, *)) {
-    // TODO not available in iOS9 deployment target - enable once iOS10+ deployment target specified
-    // in podspec. settingsDictionary[@"announcement"] =
-    //   [FLTFirebaseMessagingPlugin NSNumberForUNNotificationSetting:settings.announcementSetting];
     settingsDictionary[@"announcement"] = @-1;
   } else {
     settingsDictionary[@"announcement"] = @-1;
@@ -710,14 +661,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
   return [self remoteMessageUserInfoToDict:notification.request.content.userInfo];
 }
 #pragma mark ---- 推送消息解析和转换，此处涉及业务相关代码
-+ (NSDictionary *)myRemoteMessageUserInfoToDict:(NSDictionary *)userInfo {
-  NSMutableDictionary *message = [[NSMutableDictionary alloc] init];
-  NSMutableDictionary *data = [[NSMutableDictionary alloc] init];
-  NSMutableDictionary *notification = [[NSMutableDictionary alloc] init];
-  NSMutableDictionary *notificationIOS = [[NSMutableDictionary alloc] init];
-  
-  return  message;
-}
 + (NSDictionary *)remoteMessageUserInfoToDict:(NSDictionary *)userInfo {
   NSMutableDictionary *message = [[NSMutableDictionary alloc] init];
   NSMutableDictionary *data = [[NSMutableDictionary alloc] init];
@@ -918,10 +861,8 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
       return initialNotificationCopy;
     }
   }
-
   return nil;
 }
-
 - (NSDictionary *)NSDictionaryForNSError:(NSError *)error {
   NSString *code = @"unknown";
   NSString *message = @"An unknown error has occurred.";
@@ -933,7 +874,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
       kMessagingArgumentAdditionalData : @{},
     };
   }
-
   // code - codes from taken from NSError+FIRMessaging.h
   if (error.code == 4) {
     code = @"unavailable";
