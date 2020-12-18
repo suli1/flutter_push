@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'types.dart';
-import 'utils.dart';
+import 'utils/utils.dart';
 
 /// A class representing a notification which has been construted and sent to the
 /// device via FCM.

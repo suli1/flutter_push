@@ -25,7 +25,7 @@ public class FcmPush extends BasePushClient {
 
   @Override
   public void register() {
-    FirebaseMessaging.getInstance();
+    FirebaseMessaging.getInstance().setAutoInitEnabled(true);
   }
 
   @Override
@@ -48,7 +48,7 @@ public class FcmPush extends BasePushClient {
   @Override
   public void subscribeToTopic(Map<String, Object> arguments) throws ExecutionException, InterruptedException {
     FirebaseMessaging firebaseMessaging =
-      FlutterMessagingUtils.getFirebaseMessagingForArguments(arguments);
+        FlutterMessagingUtils.getFirebaseMessagingForArguments(arguments);
     String topic = (String) Objects.requireNonNull(arguments.get("topic"));
     Tasks.await(firebaseMessaging.subscribeToTopic(topic));
   }
@@ -56,7 +56,7 @@ public class FcmPush extends BasePushClient {
   @Override
   public void unsubscribeFromTopic(Map<String, Object> arguments) throws ExecutionException, InterruptedException {
     FirebaseMessaging firebaseMessaging =
-      FlutterMessagingUtils.getFirebaseMessagingForArguments(arguments);
+        FlutterMessagingUtils.getFirebaseMessagingForArguments(arguments);
     String topic = (String) Objects.requireNonNull(arguments.get("topic"));
     Tasks.await(firebaseMessaging.unsubscribeFromTopic(topic));
   }

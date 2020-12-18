@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -45,7 +46,7 @@ import io.flutter.plugins.firebase.messaging.core.PushConfig;
 import io.flutter.plugins.firebase.messaging.core.PushRemoteMessage;
 import io.flutter.plugins.firebase.messaging.core.PushType;
 import io.flutter.plugins.firebase.messaging.core.client.FcmPush;
-import io.flutter.plugins.firebase.messaging.core.client.HuaweiPush;
+import io.flutter.plugins.firebase.messaging.core.client.HmsPush;
 import io.flutter.plugins.firebase.messaging.core.client.OppoPush;
 import io.flutter.plugins.firebase.messaging.core.client.VivoPush;
 import io.flutter.plugins.firebase.messaging.core.client.XiaomiPush;
@@ -68,6 +69,8 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
   private Activity mainActivity;
   private PushRemoteMessage initialMessage;
   private IPush pushClient;
+
+  private Map<String, String> newTokenMap = new HashMap<>();
 
   @SuppressWarnings("unused")
   public static void registerWith(Registrar registrar) {
@@ -155,6 +158,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
       Map<String, Object> resultMap = new HashMap<>();
       resultMap.put("token", token);
       resultMap.put("type", pushType);
+      newTokenMap.put(pushType, token);
       channel.invokeMethod("Messaging#onTokenRefresh", resultMap);
     } else if (action.equals(FlutterMessagingUtils.ACTION_REMOTE_MESSAGE)) {
       PushRemoteMessage message = intent.getParcelableExtra(FlutterMessagingUtils.EXTRA_REMOTE_MESSAGE);
@@ -183,9 +187,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
               pushClient = new FcmPush(pushConfig);
               break;
             case OPPO: {
-              Bundle metaData = applicationContext.getPackageManager()
-                  .getApplicationInfo(applicationContext.getPackageName(),
-                      PackageManager.GET_META_DATA).metaData;
+              Bundle metaData = getMetaData();
               pushConfig.appKey = metaData.getString("com.oppo.push.app_key");
               pushConfig.appSecret = metaData.getString("com.oppo.push.app_secrect");
               pushClient = new OppoPush(pushConfig);
@@ -195,23 +197,30 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
               pushClient = new VivoPush(pushConfig);
               break;
             case XIAO_MI: {
-              Bundle metaData = applicationContext.getPackageManager()
-                  .getApplicationInfo(applicationContext.getPackageName(),
-                      PackageManager.GET_META_DATA).metaData;
+              Bundle metaData = getMetaData();
               pushConfig.appId = metaData.getString("com.xiaomi.push.app_id");
               pushConfig.appKey = metaData.getString("com.xiaomi.push.app_key");
               pushClient = new XiaomiPush(pushConfig);
               break;
             }
-            case HMS:
-              pushClient = new HuaweiPush(pushConfig);
+            case HMS: {
+              Bundle metaData = getMetaData();
+              pushConfig.appId = metaData.getString("com.huawei.push.app_id");
+              pushClient = new HmsPush(pushConfig);
               break;
+            }
             default:
               return null;
           }
           pushClient.register();
           return null;
         });
+  }
+
+  private Bundle getMetaData() throws PackageManager.NameNotFoundException {
+    return applicationContext.getPackageManager()
+        .getApplicationInfo(applicationContext.getPackageName(),
+            PackageManager.GET_META_DATA).metaData;
   }
 
   private Task<Map<String, Object>> requestPermission(Map<String, Object> arguments) {
@@ -244,14 +253,15 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
     return Tasks.call(
         cachedThreadPool,
         () -> {
-          String token = pushClient.getToken();
           String pushType = pushClient.getType().name();
-          return new HashMap<String, Object>() {
-            {
-              put("token", token);
-              put("type", pushType);
-            }
-          };
+          String token = newTokenMap.get(pushType);
+          if (TextUtils.isEmpty(token)) {
+            token = pushClient.getToken();
+          }
+          HashMap<String, Object> map = new HashMap<>();
+          map.put("type", pushType);
+          map.put("token", token);
+          return map;
         });
   }
 
@@ -423,6 +433,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
     if (intent == null || intent.getExtras() == null) {
       return false;
     }
+    LogUtils.d("onNewIntent extras:" + intent.getExtras().toString());
 
     // Remote Message ID can be either one of the following...
     String messageId = intent.getExtras().getString("google.message_id");

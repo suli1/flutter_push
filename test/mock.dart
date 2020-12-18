@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_push/src/platform_interface/platform_interface/platform_interface_messaging.dart';
+import 'package:flutter_push/src/platform_interface/method_channel/platform_interface_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';

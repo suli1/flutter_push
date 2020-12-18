@@ -2,6 +2,7 @@ package io.flutter.plugins.firebase.messaging.core.client;
 
 import com.huawei.hms.aaid.HmsInstanceId;
 import com.huawei.hms.common.ApiException;
+import com.huawei.hms.push.HmsMessaging;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -13,35 +14,34 @@ import io.flutter.plugins.firebase.messaging.core.PushConfig;
  * <p>
  * hms push
  **/
-public class HuaweiPush extends BasePushClient {
-  // 输入token标识"HCM"
-  final String tokenScope = "HCM";
+public class HmsPush extends BasePushClient {
 
-  public HuaweiPush(PushConfig config) {
+  public HmsPush(PushConfig config) {
     super(config);
   }
 
   @Override
   public void register() {
+    HmsMessaging.getInstance(getContext()).setAutoInitEnabled(true);
   }
 
   @Override
   public void unregister() {
     try {
-      HmsInstanceId.getInstance(getContext()).deleteToken(config.appId, tokenScope);
+      HmsInstanceId.getInstance(getContext()).deleteToken(config.appId, HmsMessaging.DEFAULT_TOKEN_SCOPE);
     } catch (ApiException e) {
       e.printStackTrace();
     }
   }
 
   @Override
-  public String getToken() throws ApiException {
-    return HmsInstanceId.getInstance(getContext()).getToken(config.appId, tokenScope);
+  public String getToken() throws Exception {
+    return HmsInstanceId.getInstance(getContext()).getToken(config.appId, HmsMessaging.DEFAULT_TOKEN_SCOPE);
   }
 
   @Override
-  public void deleteToken() throws ApiException {
-    HmsInstanceId.getInstance(getContext()).deleteToken(config.appId, tokenScope);
+  public void deleteToken() throws Exception {
+    HmsInstanceId.getInstance(getContext()).deleteToken(config.appId, HmsMessaging.DEFAULT_TOKEN_SCOPE);
   }
 
   @Override

@@ -11,14 +11,14 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_push/src/platform_interface/utils/exception.dart';
 
 import '../message_token.dart';
 import '../notification_settings.dart';
-import '../platform_interface/platform_interface_messaging.dart';
 import '../remote_message.dart';
 import '../types.dart';
-import '../utils.dart';
-import 'utils/exception.dart';
+import '../utils/utils.dart';
+import 'platform_interface_messaging.dart';
 
 // This is the entrypoint for the background isolate. Since we can only enter
 // an isolate once, we setup a MethodChannel to listen for method invocations

@@ -2,8 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'notification_settings.dart';
-import 'types.dart';
+import '../notification_settings.dart';
+import '../types.dart';
 
 /// Converts an [int] into it's [AndroidNotificationPriority] representation.
 AndroidNotificationPriority convertToAndroidNotificationPriority(int priority) {

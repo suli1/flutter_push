@@ -9,7 +9,7 @@ import 'dart:async';
 import 'package:flutter_push/src/platform_interface/ios_notification_settings.dart';
 import 'package:flutter_push/src/platform_interface/message_token.dart';
 import 'package:flutter_push/src/platform_interface/notification_settings.dart';
-import 'package:flutter_push/src/platform_interface/platform_interface/platform_interface_messaging.dart';
+import 'package:flutter_push/src/platform_interface/method_channel/platform_interface_messaging.dart';
 import 'package:flutter_push/src/platform_interface/remote_message.dart';
 import 'package:flutter_push/src/platform_interface/types.dart';
 
