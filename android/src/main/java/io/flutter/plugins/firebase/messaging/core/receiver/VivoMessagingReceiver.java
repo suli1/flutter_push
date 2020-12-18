@@ -2,7 +2,6 @@ package io.flutter.plugins.firebase.messaging.core.receiver;
 
 import android.content.Context;
 
-import com.vivo.push.model.UPSNotificationMessage;
 import com.vivo.push.sdk.OpenClientPushMessageReceiver;
 
 import io.flutter.plugins.firebase.messaging.core.FlutterMessagingUtils;
@@ -20,10 +19,5 @@ public class VivoMessagingReceiver extends OpenClientPushMessageReceiver {
   public void onReceiveRegId(Context context, String regId) {
     LogUtils.d("Vivo onNewToken:" + regId);
     FlutterMessagingUtils.sendTokenBroadcast(context, regId, PushType.VIVO);
-  }
-
-  @Override
-  public void onNotificationMessageClicked(Context context, UPSNotificationMessage message) {
-    LogUtils.d("Vivo onNotificationMessageClicked:" + message.getMsgId());
   }
 }

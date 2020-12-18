@@ -189,7 +189,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
             case OPPO: {
               Bundle metaData = getMetaData();
               pushConfig.appKey = metaData.getString("com.oppo.push.app_key");
-              pushConfig.appSecret = metaData.getString("com.oppo.push.app_secrect");
+              pushConfig.appSecret = metaData.getString("com.oppo.push.app_secret");
               pushClient = new OppoPush(pushConfig);
               break;
             }
@@ -430,11 +430,12 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
 
   @Override
   public boolean onNewIntent(Intent intent) {
+    if (intent != null) {
+      LogUtils.d("intent extras:" + intent.getExtras() + ",action:" + intent.getDataString());
+    }
     if (intent == null || intent.getExtras() == null) {
       return false;
     }
-    LogUtils.d("onNewIntent extras:" + intent.getExtras().toString());
-
     // Remote Message ID can be either one of the following...
     String messageId = intent.getExtras().getString("google.message_id");
     if (messageId == null) messageId = intent.getExtras().getString("message_id");

@@ -1,7 +1,6 @@
 package io.flutter.plugins.firebase.messaging.core.client;
 
 import com.vivo.push.PushClient;
-import com.vivo.push.ups.VUpsManager;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -11,6 +10,8 @@ import io.flutter.plugins.firebase.messaging.core.PushConfig;
 
 /**
  * Created by suli on 2020/12/7
+ * <p>
+ * Vivo push
  **/
 public class VivoPush extends BasePushClient {
 
@@ -20,16 +21,11 @@ public class VivoPush extends BasePushClient {
 
   @Override
   public void register() {
+    PushClient.getInstance(getContext()).initialize();
+
     PushClient.getInstance(getContext()).turnOnPush(state -> {
-      // TODO: 开关状态处理， 0代表成功
       LogUtils.d("vivo push status changed:" + state);
     });
-
-    // 统一推送联盟接入
-    VUpsManager.getInstance().turnOnPush(getContext(), codeResult -> LogUtils.d("vivo ups result:" + codeResult.getReturnCode()));
-
-    String regId = PushClient.getInstance(getContext()).getRegId();
-    LogUtils.d("vivo push regId:" + regId);
   }
 
   @Override
