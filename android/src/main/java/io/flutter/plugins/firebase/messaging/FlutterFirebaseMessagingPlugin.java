@@ -70,7 +70,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
   private PushRemoteMessage initialMessage;
   private IPush pushClient;
 
-  private Map<String, String> newTokenMap = new HashMap<>();
+  private final Map<String, String> newTokenMap = new HashMap<>();
 
   @SuppressWarnings("unused")
   public static void registerWith(Registrar registrar) {
@@ -228,7 +228,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
         cachedThreadPool,
         () -> {
           boolean isEnabled = NotificationManagerCompat.from(applicationContext).areNotificationsEnabled();
-          if (pushClient.getType() == PushType.OPPO) {
+          if ((pushClient != null && pushClient.getType() == PushType.OPPO) || HeytapPushManager.isSupportPush()) {
             LogUtils.d("HeytapPushManager.requestNotificationPermission");
             HeytapPushManager.requestNotificationPermission();
           }
