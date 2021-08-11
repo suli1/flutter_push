@@ -11,7 +11,6 @@ import android.content.Intent;
 import com.google.firebase.messaging.RemoteMessage;
 
 import io.flutter.plugins.firebase.messaging.core.FlutterMessagingUtils;
-import io.flutter.plugins.firebase.messaging.core.LogUtils;
 import io.flutter.plugins.firebase.messaging.core.PushRemoteMessage;
 
 public class FcmMessagingReceiver extends BroadcastReceiver {
@@ -19,8 +18,6 @@ public class FcmMessagingReceiver extends BroadcastReceiver {
   @Override
   public void onReceive(Context context, Intent intent) {
     PushRemoteMessage remoteMessage = PushRemoteMessage.buildFromFcm(new RemoteMessage(intent.getExtras()));
-    LogUtils.d("broadcast received for FCM message:" + remoteMessage.data);
-
     FlutterMessagingUtils.sendMessageBroadcast(context, remoteMessage);
   }
 }

@@ -1,18 +1,12 @@
 package io.flutter.plugins.firebase.messaging.core.client;
 
 import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.Metadata;
 import com.google.firebase.messaging.FirebaseMessaging;
-
-import java.io.IOException;
+import io.flutter.plugins.firebase.messaging.core.FlutterMessagingUtils;
+import io.flutter.plugins.firebase.messaging.core.PushConfig;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
-
-import io.flutter.plugins.firebase.messaging.core.FlutterMessagingUtils;
-import io.flutter.plugins.firebase.messaging.core.PushConfig;
 
 /**
  * Created by suli on 2020/12/8
@@ -34,19 +28,18 @@ public class FcmPush extends BasePushClient {
   }
 
   @Override
-  public String getToken() throws IOException {
-    String senderId = Metadata.getDefaultSenderId(FirebaseApp.getInstance());
-    return FirebaseInstanceId.getInstance().getToken(senderId, "*");
+  public String getToken() {
+    return FirebaseMessaging.getInstance().getToken().getResult();
   }
 
   @Override
-  public void deleteToken() throws IOException {
-    String senderId = Metadata.getDefaultSenderId(FirebaseApp.getInstance());
-    FirebaseInstanceId.getInstance().deleteToken(senderId, "*");
+  public void deleteToken() throws ExecutionException, InterruptedException {
+    Tasks.await(FirebaseMessaging.getInstance().deleteToken());
   }
 
   @Override
-  public void subscribeToTopic(Map<String, Object> arguments) throws ExecutionException, InterruptedException {
+  public void subscribeToTopic(Map<String, Object> arguments)
+      throws ExecutionException, InterruptedException {
     FirebaseMessaging firebaseMessaging =
         FlutterMessagingUtils.getFirebaseMessagingForArguments(arguments);
     String topic = (String) Objects.requireNonNull(arguments.get("topic"));
@@ -54,7 +47,8 @@ public class FcmPush extends BasePushClient {
   }
 
   @Override
-  public void unsubscribeFromTopic(Map<String, Object> arguments) throws ExecutionException, InterruptedException {
+  public void unsubscribeFromTopic(Map<String, Object> arguments)
+      throws ExecutionException, InterruptedException {
     FirebaseMessaging firebaseMessaging =
         FlutterMessagingUtils.getFirebaseMessagingForArguments(arguments);
     String topic = (String) Objects.requireNonNull(arguments.get("topic"));

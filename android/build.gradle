@@ -4,7 +4,7 @@ version '1.0-SNAPSHOT'
 buildscript {
   repositories {
     google()
-    jcenter()
+    mavenCentral()
   }
 
   dependencies {
@@ -15,7 +15,7 @@ buildscript {
 rootProject.allprojects {
   repositories {
     google()
-    jcenter()
+    mavenCentral()
     maven { url 'https://developer.huawei.com/repo/' }
     flatDir {
       dirs project(':flutter_push').file('aars')
@@ -53,6 +53,7 @@ android {
   }
   dependencies {
     api firebaseCoreProject
+    implementation 'com.google.android.gms:play-services-base:17.6.0'
     implementation platform("com.google.firebase:firebase-bom:${getRootProjectExtOrCoreProperty("FirebaseSDKVersion", firebaseCoreProject)}")
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
