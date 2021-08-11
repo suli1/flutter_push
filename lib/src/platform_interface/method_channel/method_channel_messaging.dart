@@ -41,7 +41,7 @@ void _firebaseMessagingCallbackDispatcher() {
 
       // PluginUtilities.getCallbackFromHandle performs a lookup based on the
       // callback handle and returns a tear-off of the original callback.
-      final Function closure = PluginUtilities.getCallbackFromHandle(handle);
+      final Function? closure = PluginUtilities.getCallbackFromHandle(handle);
 
       if (closure == null) {
         print('Fatal: could not find user callback');
@@ -85,11 +85,16 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
           ));
           break;
         case "Messaging#onMessage":
-          print(call.arguments);
-          Map<String, dynamic> messageMap =
-              Map<String, dynamic>.from(call.arguments);
-          FirebaseMessagingPlatform.onMessage
-              .add(RemoteMessage.fromMap(messageMap));
+          print('Messaging#onMessage call');
+          try {
+            Map<String, dynamic> messageMap =
+                Map<String, dynamic>.from(call.arguments);
+            FirebaseMessagingPlatform.onMessage
+                .add(RemoteMessage.fromMap(messageMap));
+          } catch (e, s) {
+            debugPrintStack(stackTrace: s);
+          }
+          print('Messaging#onMessage add:${call.arguments}');
           break;
         case "Messaging#onMessageOpenedApp":
           Map<String, dynamic> messageMap =
@@ -140,9 +145,9 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
   }
 
   @override
-  Future<RemoteMessage> getInitialMessage() async {
+  Future<RemoteMessage?> getInitialMessage() async {
     try {
-      Map<String, dynamic> remoteMessageMap = await channel
+      Map<String, dynamic>? remoteMessageMap = await channel
           .invokeMapMethod<String, dynamic>('Messaging#getInitialMessage');
 
       if (remoteMessageMap == null) {
@@ -157,20 +162,20 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
 
   @override
   void registerBackgroundMessageHandler(
-      BackgroundMessageHandler handler) async {
+      BackgroundMessageHandler? handler) async {
     if (handler == null || defaultTargetPlatform != TargetPlatform.android) {
       return;
     }
 
     if (!_bgHandlerInitialized) {
       _bgHandlerInitialized = true;
-      final CallbackHandle bgHandle = PluginUtilities.getCallbackHandle(
+      final CallbackHandle? bgHandle = PluginUtilities.getCallbackHandle(
           _firebaseMessagingCallbackDispatcher);
-      final CallbackHandle userHandle =
+      final CallbackHandle? userHandle =
           PluginUtilities.getCallbackHandle(handler);
       await channel.invokeMapMethod('Messaging#startBackgroundIsolate', {
-        'pluginCallbackHandle': bgHandle.toRawHandle(),
-        'userCallbackHandle': userHandle.toRawHandle(),
+        'pluginCallbackHandle': bgHandle?.toRawHandle(),
+        'userCallbackHandle': userHandle?.toRawHandle(),
       });
     }
   }
@@ -185,7 +190,7 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
   }
 
   @override
-  Future<String> getAPNSToken() async {
+  Future<String?> getAPNSToken() async {
     if (defaultTargetPlatform != TargetPlatform.iOS &&
         defaultTargetPlatform != TargetPlatform.macOS) {
       return null;
@@ -193,17 +198,20 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
 
     try {
       return (await channel
-          .invokeMapMethod<String, String>('Messaging#getAPNSToken'))['token'];
+          .invokeMapMethod<String, String>('Messaging#getAPNSToken'))?['token'];
     } catch (e) {
       throw convertPlatformException(e);
     }
   }
 
   @override
-  Future<MessageToken> getToken() async {
+  Future<MessageToken?> getToken() async {
     try {
-      Map<String, dynamic> result =
+      Map<String, dynamic>? result =
           (await channel.invokeMapMethod<String, String>('Messaging#getToken'));
+      if (result == null) {
+        return null;
+      }
       return MessageToken(type: result['type'], token: result['token']);
     } catch (e) {
       throw convertPlatformException(e);
@@ -211,16 +219,18 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
   }
 
   @override
-  Future<NotificationSettings> getNotificationSettings() async {
+  Future<NotificationSettings?> getNotificationSettings() async {
     if (defaultTargetPlatform != TargetPlatform.iOS &&
         defaultTargetPlatform != TargetPlatform.macOS) {
       return androidNotificationSettings;
     }
 
     try {
-      Map<String, int> response = await channel
+      Map<String, int>? response = await channel
           .invokeMapMethod<String, int>('Messaging#getNotificationSettings');
-
+      if (response == null) {
+        return null;
+      }
       return convertToNotificationSettings(response);
     } catch (e) {
       throw convertPlatformException(e);
@@ -228,7 +238,7 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
   }
 
   @override
-  Future<NotificationSettings> requestPermission(
+  Future<NotificationSettings?> requestPermission(
       {bool alert = true,
       bool announcement = false,
       bool badge = true,
@@ -242,7 +252,7 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
     // }
 
     try {
-      Map<String, int> response = await channel
+      Map<String, int>? response = await channel
           .invokeMapMethod<String, int>('Messaging#requestPermission', {
         'permissions': <String, bool>{
           'alert': alert,
@@ -254,7 +264,9 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
           'sound': sound,
         }
       });
-
+      if (response == null) {
+        return null;
+      }
       return convertToNotificationSettings(response);
     } catch (e) {
       throw convertPlatformException(e);
@@ -268,9 +280,9 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
 
   @override
   Future<void> setForegroundNotificationPresentationOptions({
-    bool alert,
-    bool badge,
-    bool sound,
+    bool? alert,
+    bool? badge,
+    bool? sound,
   }) async {
     if (defaultTargetPlatform != TargetPlatform.iOS &&
         defaultTargetPlatform != TargetPlatform.macOS) {

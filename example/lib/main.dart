@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_push/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +23,7 @@ import 'token_monitor.dart';
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
   // make sure you call `initializeApp` before using other Firebase services.
-  await Firebase.initializeApp();
+  // await Firebase.initializeApp();
   print("Handling a background message ${message.messageId}");
 }
 
@@ -44,7 +43,7 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  // await Firebase.initializeApp();
 
   // Set the background messaging handler early on, as a named top-level function
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -110,14 +109,14 @@ class Application extends StatefulWidget {
 }
 
 class _Application extends State<Application> {
-  String _token;
+  String? _token;
 
   @override
   void initState() {
     super.initState();
     FirebaseMessaging.instance
         .getInitialMessage()
-        .then((RemoteMessage message) {
+        .then((RemoteMessage? message) {
       if (message != null) {
         Navigator.pushNamed(context, '/message',
             arguments: MessageArguments(message, true));
@@ -128,8 +127,8 @@ class _Application extends State<Application> {
       print('Remote message:'
           '{from:${message.from}, messageId:${message.messageId},'
           'messageType:${message.messageType}, data:${message.data}');
-      RemoteNotification notification = message.notification;
-      AndroidNotification android = message.notification?.android;
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
 
       if (notification != null && android != null) {
         flutterLocalNotificationsPlugin.show(
@@ -164,11 +163,11 @@ class _Application extends State<Application> {
 
     try {
       await http.post(
-        'https://api.rnfirebase.io/messaging/send',
+        Uri.parse('https://api.rnfirebase.io/messaging/send'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: constructFCMPayload(_token),
+        body: constructFCMPayload(_token!),
       );
       print('FCM request for device sent!');
     } catch (e) {
@@ -201,7 +200,7 @@ class _Application extends State<Application> {
           if (defaultTargetPlatform == TargetPlatform.iOS ||
               defaultTargetPlatform == TargetPlatform.macOS) {
             print('FlutterFire Messaging Example: Getting APNs token...');
-            String token = await FirebaseMessaging.instance.getAPNSToken();
+            String? token = await FirebaseMessaging.instance.getAPNSToken();
             print('FlutterFire Messaging Example: Got APNs token: $token');
           } else {
             print(

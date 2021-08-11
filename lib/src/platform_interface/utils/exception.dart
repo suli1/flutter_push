@@ -3,7 +3,6 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:quiver/core.dart';
 
 /// Catches a [PlatformException] and converts it into a [FirebaseException] if
@@ -13,7 +12,7 @@ Exception convertPlatformException(Object exception) {
     throw exception;
   }
 
-  return platformExceptionToFirebaseException(exception as PlatformException);
+  return platformExceptionToFirebaseException(exception);
 }
 
 /// Converts a [PlatformException] into a [FirebaseException].
@@ -28,7 +27,7 @@ FirebaseException platformExceptionToFirebaseException(
   //     : null;
 
   String code = 'unknown';
-  String message = platformException.message;
+  String? message = platformException.message;
 
   if (platformException.details != null) {
     code = platformException.details['code'] ?? code;
@@ -36,7 +35,10 @@ FirebaseException platformExceptionToFirebaseException(
   }
 
   return FirebaseException(
-      plugin: 'firebase_messaging', code: code, message: message);
+    plugin: 'firebase_messaging',
+    code: code,
+    message: message ?? '',
+  );
 }
 
 /// A generic class which provides exceptions in a Firebase-friendly format
@@ -61,8 +63,8 @@ class FirebaseException implements Exception {
   /// }
   /// ```
   FirebaseException({
-    @required this.plugin,
-    @required this.message,
+    required this.plugin,
+    required this.message,
     this.code = 'unknown',
     this.stackTrace,
   });
@@ -85,7 +87,7 @@ class FirebaseException implements Exception {
 
   /// The stack trace which provides information to the user about the call
   /// sequence that triggered an exception
-  final StackTrace stackTrace;
+  final StackTrace? stackTrace;
 
   @override
   bool operator ==(dynamic other) {

@@ -4,7 +4,7 @@ class MessageToken {
   final String token;
 
   MessageToken({
-    this.type,
-    this.token,
+    required this.type,
+    required this.token,
   });
 }

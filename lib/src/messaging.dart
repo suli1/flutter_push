@@ -11,14 +11,10 @@ class FirebaseMessaging {
   // Cached and lazily loaded instance of [FirebaseMessagingPlatform] to avoid
   // creating a [MethodChannelFirebaseMessaging] when not needed or creating an
   // instance with the default app before a user specifies an app.
-  FirebaseMessagingPlatform _delegatePackingProperty;
+  FirebaseMessagingPlatform? _delegatePackingProperty;
 
-  FirebaseMessagingPlatform get _delegate {
-    if (_delegatePackingProperty == null) {
-      _delegatePackingProperty = FirebaseMessagingPlatform.instanceFor();
-    }
-    return _delegatePackingProperty;
-  }
+  FirebaseMessagingPlatform get _delegate =>
+      _delegatePackingProperty ??= FirebaseMessagingPlatform.instanceFor();
 
   FirebaseMessaging._();
 
@@ -34,17 +30,8 @@ class FirebaseMessaging {
   ///
   /// To handle messages whilst the app is in the background or terminated,
   /// see [onBackgroundMessage].
-  static Stream<RemoteMessage> get onMessage {
-    Stream<RemoteMessage> onMessageStream =
-        FirebaseMessagingPlatform.onMessage.stream;
-
-    StreamController<RemoteMessage> streamController;
-    streamController = StreamController<RemoteMessage>.broadcast(onListen: () {
-      onMessageStream.pipe(streamController);
-    });
-
-    return streamController.stream;
-  }
+  static Stream<RemoteMessage> get onMessage =>
+      FirebaseMessagingPlatform.onMessage.stream;
 
   /// Returns a [Stream] that is called when a user presses a notification message displayed
   /// via FCM.
@@ -54,17 +41,8 @@ class FirebaseMessaging {
   ///
   /// If your app is opened via a notification whilst the app is terminated,
   /// see [getInitialMessage].
-  static Stream<RemoteMessage> get onMessageOpenedApp {
-    Stream<RemoteMessage> onMessageOpenedAppStream =
-        FirebaseMessagingPlatform.onMessageOpenedApp.stream;
-
-    StreamController<RemoteMessage> streamController;
-    streamController = StreamController<RemoteMessage>.broadcast(onListen: () {
-      onMessageOpenedAppStream.pipe(streamController);
-    });
-
-    return streamController.stream;
-  }
+  static Stream<RemoteMessage> get onMessageOpenedApp =>
+      FirebaseMessagingPlatform.onMessageOpenedApp.stream;
 
   /// Set a message handler function which is called when the app is in the
   /// background or terminated.
@@ -91,7 +69,7 @@ class FirebaseMessaging {
   /// This should be used to determine whether specific notification interaction
   /// should open the app with a specific purpose (e.g. opening a chat message,
   /// specific screen etc).
-  Future<RemoteMessage> getInitialMessage() {
+  Future<RemoteMessage?> getInitialMessage() {
     return _delegate.getInitialMessage();
   }
 
@@ -108,12 +86,12 @@ class FirebaseMessaging {
   /// without using the FCM service.
   ///
   /// On Android & web, this returns `null`.
-  Future<String> getAPNSToken() {
+  Future<String?> getAPNSToken() {
     return _delegate.getAPNSToken();
   }
 
   /// Returns the default FCM token for this device and optionally a [senderId].
-  Future<MessageToken> getToken() {
+  Future<MessageToken?> getToken() {
     return _delegate.getToken();
   }
 
@@ -125,7 +103,7 @@ class FirebaseMessaging {
   /// Returns the current [NotificationSettings].
   ///
   /// To request permissions, call [requestPermission].
-  Future<NotificationSettings> getNotificationSettings() {
+  Future<NotificationSettings?> getNotificationSettings() {
     return _delegate.getNotificationSettings();
   }
 
@@ -143,7 +121,7 @@ class FirebaseMessaging {
   /// automatically granted. When notifications are delivered to the device, the
   /// user will be presented with an option to disable notifications, keep receiving
   /// them silently or enable prominent notifications.
-  Future<NotificationSettings> requestPermission({
+  Future<NotificationSettings?> requestPermission({
     /// Request permission to display alerts. Defaults to `true`.
     ///
     /// iOS/macOS only.
@@ -208,15 +186,15 @@ class FirebaseMessaging {
   @Deprecated(
       "requestNotificationPermissions() is deprecated in favor of requestPermission()")
   Future<bool> requestNotificationPermissions(
-      [IosNotificationSettings iosSettings]) async {
+      [IosNotificationSettings? iosSettings]) async {
     iosSettings ??= const IosNotificationSettings();
-    AuthorizationStatus status = (await requestPermission(
+    AuthorizationStatus? status = (await requestPermission(
       sound: iosSettings.sound,
       alert: iosSettings.alert,
       badge: iosSettings.badge,
       provisional: iosSettings.provisional,
     ))
-        .authorizationStatus;
+        ?.authorizationStatus;
 
     return status == AuthorizationStatus.authorized ||
         status == AuthorizationStatus.provisional;
@@ -287,8 +265,6 @@ class FirebaseMessaging {
 }
 
 _assertTopicName(String topic) {
-  assert(topic != null);
-
   bool isValidTopic = RegExp(r"^[a-zA-Z0-9-_.~%]{1,900}$").hasMatch(topic);
 
   assert(isValidTopic);

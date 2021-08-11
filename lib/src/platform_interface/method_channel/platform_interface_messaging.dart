@@ -8,10 +8,10 @@ import 'package:meta/meta.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import '../message_token.dart';
-import 'method_channel_messaging.dart';
 import '../notification_settings.dart';
 import '../remote_message.dart';
 import '../types.dart';
+import 'method_channel_messaging.dart';
 
 /// Defines an interface to work with Messaging on web and mobile.
 abstract class FirebaseMessagingPlatform extends PlatformInterface {
@@ -33,39 +33,29 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
     return FirebaseMessagingPlatform.instance.delegateFor();
   }
 
-  static FirebaseMessagingPlatform _instance;
+  static FirebaseMessagingPlatform? _instance;
 
   /// The current default [FirebaseMessagingPlatform] instance.
   ///
   /// It will always default to [MethodChannelFirebaseMessaging]
   /// if no other implementation was provided.
-  static FirebaseMessagingPlatform get instance {
-    if (_instance == null) {
-      _instance = MethodChannelFirebaseMessaging.instance;
-    }
-    return _instance;
-  }
+  static FirebaseMessagingPlatform get instance =>
+      _instance ??= MethodChannelFirebaseMessaging.instance;
 
   /// Sets the [FirebaseMessagingPlatform.instance]
   static set instance(FirebaseMessagingPlatform instance) {
-    assert(instance != null);
     PlatformInterface.verifyToken(instance, _token);
     _instance = instance;
   }
-
-  static StreamController<RemoteMessage> _onMessageStreamController;
 
   /// Returns a Stream that is called when an incoming FCM payload is received whilst
   /// the Flutter instance is in the foreground.
   ///
   /// To handle messages whilst the app is in the background or terminated,
   /// see [onBackgroundMessage].
-  static StreamController<RemoteMessage> get onMessage {
-    return _onMessageStreamController ??=
-        StreamController<RemoteMessage>.broadcast();
-  }
-
-  static StreamController<RemoteMessage> _onMessageOpenedAppStreamController;
+  // ignore: close_sinks, never closed
+  static final StreamController<RemoteMessage> onMessage =
+      StreamController<RemoteMessage>.broadcast();
 
   /// Returns a [Stream] that is called when a user presses a notification displayed
   /// via FCM.
@@ -75,26 +65,25 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
   ///
   /// If your app is opened via a notification whilst the app is terminated,
   /// see [getInitialMessage].
-  static StreamController<RemoteMessage> get onMessageOpenedApp {
-    return _onMessageOpenedAppStreamController ??=
-        StreamController<RemoteMessage>.broadcast();
-  }
+  // ignore: close_sinks, never closed
+  static final StreamController<RemoteMessage> onMessageOpenedApp =
+      StreamController<RemoteMessage>.broadcast();
 
-  static BackgroundMessageHandler _onBackgroundMessageHandler;
+  static BackgroundMessageHandler? _onBackgroundMessageHandler;
 
   /// Set a message handler function which is called when the app is in the
   /// background or terminated.
   ///
   /// This provided handler must be a top-level function and cannot be
   /// anonymous otherwise an [ArgumentError] will be thrown.
-  static BackgroundMessageHandler get onBackgroundMessage {
+  static BackgroundMessageHandler? get onBackgroundMessage {
     return _onBackgroundMessageHandler;
   }
 
   /// Allows the background message handler to be created and calls the
   /// instance delegate [registerBackgroundMessageHandler] to perform any
   /// platform specific registration logic.
-  static set onBackgroundMessage(BackgroundMessageHandler handler) {
+  static set onBackgroundMessage(BackgroundMessageHandler? handler) {
     _onBackgroundMessageHandler = handler;
     instance.registerBackgroundMessageHandler(handler);
   }
@@ -115,7 +104,7 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
   /// This should be used to determine whether specific notification interaction
   /// should open the app with a specific purpose (e.g. opening a chat message,
   /// specific screen etc).
-  Future<RemoteMessage> getInitialMessage() {
+  Future<RemoteMessage?> getInitialMessage() {
     throw UnimplementedError('getInitialMessage() is not implemented');
   }
 
@@ -123,7 +112,7 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
   ///
   /// For example, on native platforms this could be to setup an isolate, whereas
   /// on web a service worker can be registered.
-  void registerBackgroundMessageHandler(BackgroundMessageHandler handler) {
+  void registerBackgroundMessageHandler(BackgroundMessageHandler? handler) {
     throw UnimplementedError(
         'registerBackgroundMessageHandler() is not implemented');
   }
@@ -137,12 +126,12 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
 
   /// On iOS & MacOS, it is possible to get the users APNs token. This may be required
   /// if you want to send messages to your iOS devices without using the FCM service.
-  Future<String> getAPNSToken() {
+  Future<String?> getAPNSToken() {
     throw UnimplementedError('getAPNSToken() is not implemented');
   }
 
   /// Returns the default Push token for this device
-  Future<MessageToken> getToken() {
+  Future<MessageToken?> getToken() {
     throw UnimplementedError('getToken() is not implemented');
   }
 
@@ -154,7 +143,7 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
   /// Returns the current [NotificationSettings].
   ///
   /// To request permissions, call [requestPermission].
-  Future<NotificationSettings> getNotificationSettings() {
+  Future<NotificationSettings?> getNotificationSettings() {
     throw UnimplementedError('getNotificationSettings() is not implemented');
   }
 
@@ -173,7 +162,7 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
   ///
   /// On Web, a popup requesting the users permission is shown using the native
   /// browser API.
-  Future<NotificationSettings> requestPermission({
+  Future<NotificationSettings?> requestPermission({
     /// Request permission to display alerts. Defaults to `true`.
     ///
     /// iOS only.
@@ -239,9 +228,9 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
   /// If all arguments are `false`, a notification message will not be displayed in the
   /// foreground.
   Future<void> setForegroundNotificationPresentationOptions({
-    bool alert,
-    bool badge,
-    bool sound,
+    bool? alert,
+    bool? badge,
+    bool? sound,
   }) {
     throw UnimplementedError(
         'setForegroundNotificationPresentationOptions() is not implemented');

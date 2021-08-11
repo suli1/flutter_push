@@ -7,16 +7,17 @@ import 'types.dart';
 /// Represents the devices notification settings.
 class NotificationSettings {
   // ignore: public_member_api_docs
-  const NotificationSettings(
-      {this.alert,
-      this.announcement,
-      this.authorizationStatus,
-      this.badge,
-      this.carPlay,
-      this.lockScreen,
-      this.notificationCenter,
-      this.showPreviews,
-      this.sound});
+  const NotificationSettings({
+    required this.alert,
+    required this.announcement,
+    required this.authorizationStatus,
+    required this.badge,
+    required this.carPlay,
+    required this.lockScreen,
+    required this.notificationCenter,
+    required this.showPreviews,
+    required this.sound,
+  });
 
   /// Whether or not messages containing a notification will alert the user.
   ///

@@ -18,9 +18,9 @@ public class FcmMessagingReceiver extends BroadcastReceiver {
 
   @Override
   public void onReceive(Context context, Intent intent) {
-    LogUtils.d("broadcast received for FCM message");
-
     PushRemoteMessage remoteMessage = PushRemoteMessage.buildFromFcm(new RemoteMessage(intent.getExtras()));
+    LogUtils.d("broadcast received for FCM message:" + remoteMessage.data);
+
     FlutterMessagingUtils.sendMessageBroadcast(context, remoteMessage);
   }
 }

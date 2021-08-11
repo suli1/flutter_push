@@ -7,20 +7,21 @@ import 'remote_notification.dart';
 /// A class representing a message sent from Firebase Cloud Messaging.
 class RemoteMessage {
   // ignore: public_member_api_docs
-  const RemoteMessage(
-      {this.senderId,
-      this.category,
-      this.collapseKey,
-      this.contentAvailable,
-      this.data,
-      this.from,
-      this.messageId,
-      this.messageType,
-      this.mutableContent,
-      this.notification,
-      this.sentTime,
-      this.threadId,
-      this.ttl});
+  const RemoteMessage({
+    this.senderId,
+    this.category,
+    this.collapseKey,
+    this.contentAvailable = false,
+    this.data = const <String, dynamic>{},
+    this.from,
+    this.messageId,
+    this.messageType,
+    this.mutableContent = false,
+    this.notification,
+    this.sentTime,
+    this.threadId,
+    this.ttl,
+  });
 
   /// Constructs a [RemoteMessage] from a raw Map.
   factory RemoteMessage.fromMap(Map<String, dynamic> map) {
@@ -51,13 +52,13 @@ class RemoteMessage {
   }
 
   /// The ID of the upstream sender location.
-  final String senderId;
+  final String? senderId;
 
   /// The iOS category this notification is assigned to.
-  final String category;
+  final String? category;
 
   /// The collapse key a message was sent with. Used to override existing messages with the same key.
-  final String collapseKey;
+  final String? collapseKey;
 
   /// Whether the iOS APNs message was configured as a background update notification.
   final bool contentAvailable;
@@ -66,27 +67,27 @@ class RemoteMessage {
   final Map<String, dynamic> data;
 
   /// The topic name or message identifier.
-  final String from;
+  final String? from;
 
   /// A unique ID assigned to every message.
-  final String messageId;
+  final String? messageId;
 
   /// The message type of the message.
-  final String messageType;
+  final String? messageType;
 
   /// Whether the iOS APNs `mutable-content` property on the message was set
   /// allowing the app to modify the notification via app extensions.
   final bool mutableContent;
 
   /// Additional Notification data sent with the message.
-  final RemoteNotification notification;
+  final RemoteNotification? notification;
 
   /// The time the message was sent, represented as a [DateTime].
-  final DateTime sentTime;
+  final DateTime? sentTime;
 
   /// An iOS app specific identifier used for notification grouping.
-  final String threadId;
+  final String? threadId;
 
   /// The time to live for the message in seconds.
-  final int ttl;
+  final int? ttl;
 }

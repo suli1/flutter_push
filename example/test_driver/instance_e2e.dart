@@ -4,7 +4,6 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_push/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,12 +12,12 @@ const bool SKIP_MANUAL_TESTS = bool.fromEnvironment('CI', defaultValue: false);
 
 void runInstanceTests() {
   group('$FirebaseMessaging.instance', () {
-    FirebaseApp app;
+    // FirebaseApp app;
     FirebaseMessaging messaging;
 
     setUpAll(() async {
-      app = await Firebase.initializeApp();
-      messaging = FirebaseMessaging.instance;
+      // app = await Firebase.initializeApp();
+      // messaging = FirebaseMessaging.instance;
     });
 
     tearDownAll(() {});

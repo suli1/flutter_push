@@ -16,6 +16,7 @@ class _MessageList extends State<MessageList> {
   void initState() {
     super.initState();
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('MessageList onMessage:${message.data}');
       setState(() {
         _messages = [..._messages, message];
       });
@@ -35,7 +36,7 @@ class _MessageList extends State<MessageList> {
           RemoteMessage message = _messages[index];
 
           return ListTile(
-            title: Text(message.messageId),
+            title: Text(message.messageId!),
             subtitle: Text(message.sentTime?.toString() ?? 'N/A'),
             onTap: () => Navigator.pushNamed(context, '/message',
                 arguments: MessageArguments(message, false)),
