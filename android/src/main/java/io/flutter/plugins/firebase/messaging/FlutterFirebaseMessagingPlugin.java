@@ -182,9 +182,16 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
           LogUtils.d("Support push type:" + pushType.name());
 
           PushConfig pushConfig = initConfig(pushType);
+
+          // 可能某个支持的推送未配置，选择一个默认的推送
           if (pushConfig.client == null) {
-            pushConfig = initConfig(PushType.XIAO_MI);
+            if (FlutterMessagingUtils.isSupportFcm(applicationContext)) {
+              pushConfig = initConfig(PushType.FCM);
+            } else {
+              pushConfig = initConfig(PushType.XIAO_MI);
+            }
           }
+          LogUtils.d("init push type:" + pushConfig.type);
 
           if (pushConfig.client != null) {
             Constructor<?> constructor = pushConfig.client.getConstructor(PushConfig.class);
@@ -271,7 +278,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
         });
   }
 
-  private Task<Void> deleteToken(Map<String, Object> arguments) {
+  private Task<Void> deleteToken() {
     return Tasks.call(
         cachedThreadPool,
         () -> {
@@ -282,21 +289,22 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
         });
   }
 
-  private Task<Map<String, Object>> getToken() {
+  private Task<Object> getToken() {
     return Tasks.call(
         cachedThreadPool,
         () -> {
-          HashMap<String, Object> map = new HashMap<>();
           if (pushClient != null) {
             String pushType = pushClient.getType().name();
             String token = newTokenMap.get(pushType);
             if (TextUtils.isEmpty(token)) {
               token = pushClient.getToken();
             }
+            HashMap<String, Object> map = new HashMap<>();
             map.put("type", pushType);
             map.put("token", token);
+            return map;
           }
-          return map;
+          return null;
         });
   }
 
@@ -304,7 +312,9 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
     return Tasks.call(
         cachedThreadPool,
         () -> {
-          pushClient.subscribeToTopic(arguments);
+          if (pushClient != null) {
+            pushClient.subscribeToTopic(arguments);
+          }
           return null;
         });
   }
@@ -313,7 +323,9 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
     return Tasks.call(
         cachedThreadPool,
         () -> {
-          pushClient.unsubscribeFromTopic(arguments);
+          if (pushClient != null) {
+            pushClient.unsubscribeFromTopic(arguments);
+          }
           return null;
         });
   }
@@ -418,7 +430,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
         methodCallTask = getInitialMessage(call.arguments());
         break;
       case "Messaging#deleteToken":
-        methodCallTask = deleteToken(call.arguments());
+        methodCallTask = deleteToken();
         break;
       case "Messaging#getToken":
         methodCallTask = getToken();

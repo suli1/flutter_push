@@ -1,5 +1,6 @@
 package io.flutter.plugins.firebase.messaging.core.client;
 
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.messaging.FirebaseMessaging;
 import io.flutter.plugins.firebase.messaging.core.FlutterMessagingUtils;
@@ -29,7 +30,16 @@ public class FcmPush extends BasePushClient {
 
   @Override
   public String getToken() {
-    return FirebaseMessaging.getInstance().getToken().getResult();
+    try {
+      Task<String> tokenTask = FirebaseMessaging.getInstance().getToken();
+      Tasks.await(tokenTask);
+      return tokenTask.getResult();
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
   @Override

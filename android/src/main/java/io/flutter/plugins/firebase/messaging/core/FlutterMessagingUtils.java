@@ -58,11 +58,15 @@ public class FlutterMessagingUtils {
       return PushType.VIVO;
     } else if (RomUtils.isMiui()) {
       return PushType.XIAO_MI;
-    } else if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == 0) {
+    } else if (isSupportFcm(context)) {
       return PushType.FCM;
     } else {
       return null;
     }
+  }
+
+  public static boolean isSupportFcm(Context context) {
+    return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == 0;
   }
 
   public static void sendTokenBroadcast(Context context, String token, PushType pushType) {
