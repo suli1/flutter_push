@@ -2,7 +2,7 @@ name: flutter_push
 description: Flutter plugin for FCM, HMS, xiaomi, VIVO, OPPO, a cross-platform
   messaging solution that lets you reliably deliver messages on Android and iOS.
 homepage: https://github.com/suli1/flutter_push
-version: 2.0.1
+version: 2.1.0
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
