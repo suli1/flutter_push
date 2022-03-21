@@ -61,7 +61,7 @@ android {
     implementation fileTree(dir: 'libs', include: '*.jar')
     compileOnly(name: 'push_oppo-2.1.0', ext: 'aar')
     compileOnly(name: 'push_vivo_3.0.0.0_480', ext: 'aar')
-    implementation 'com.huawei.hms:push:5.0.4.302'
+    compileOnly 'com.huawei.hms:push:5.0.4.302'
   }
 }
 

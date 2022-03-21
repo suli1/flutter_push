@@ -24,6 +24,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.heytap.msp.push.HeytapPushManager;
 
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,6 +69,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
   private MethodChannel channel;
   private Activity mainActivity;
   private PushRemoteMessage initialMessage;
+  @Nullable
   private IPush pushClient;
 
   private final Map<String, String> newTokenMap = new HashMap<>();
@@ -179,42 +181,69 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
           }
           LogUtils.d("Support push type:" + pushType.name());
 
-          PushConfig pushConfig = new PushConfig();
-          pushConfig.type = pushType;
-
-          switch (pushType) {
-            case FCM:
-              pushClient = new FcmPush(pushConfig);
-              break;
-            case OPPO: {
-              Bundle metaData = getMetaData();
-              pushConfig.appKey = metaData.getString("com.oppo.push.app_key");
-              pushConfig.appSecret = metaData.getString("com.oppo.push.app_secret");
-              pushClient = new OppoPush(pushConfig);
-              break;
-            }
-            case VIVO:
-              pushClient = new VivoPush(pushConfig);
-              break;
-            case XIAO_MI: {
-              Bundle metaData = getMetaData();
-              pushConfig.appId = metaData.getString("com.xiaomi.push.app_id");
-              pushConfig.appKey = metaData.getString("com.xiaomi.push.app_key");
-              pushClient = new XiaomiPush(pushConfig);
-              break;
-            }
-            case HMS: {
-              Bundle metaData = getMetaData();
-              pushConfig.appId = metaData.getString("com.huawei.push.app_id");
-              pushClient = new HmsPush(pushConfig);
-              break;
-            }
-            default:
-              return null;
+          PushConfig pushConfig = initConfig(pushType);
+          if (pushConfig.client == null) {
+            pushConfig = initConfig(PushType.XIAO_MI);
           }
-          pushClient.register();
+
+          if (pushConfig.client != null) {
+            Constructor<?> constructor = pushConfig.client.getConstructor(PushConfig.class);
+            pushClient = (IPush) constructor.newInstance(pushConfig);
+            pushClient.register();
+          }
           return null;
         });
+  }
+
+  private PushConfig initConfig(PushType type) {
+    PushConfig config = new PushConfig();
+    config.type = type;
+    try {
+      switch (type) {
+        case FCM:
+          config.client = FcmPush.class;
+          break;
+        case OPPO: {
+          Bundle metaData = getMetaData();
+          String appKey = metaData.getString("com.oppo.push.app_key");
+          String appSecret = metaData.getString("com.oppo.push.app_secret");
+          if (appKey != null && appSecret != null) {
+            config.appKey = appKey;
+            config.appSecret = appSecret;
+            config.client = OppoPush.class;
+          }
+          break;
+        }
+        case VIVO:
+          config.client = VivoPush.class;
+          break;
+        case XIAO_MI: {
+          Bundle metaData = getMetaData();
+          String appId = metaData.getString("com.xiaomi.push.app_id");
+          String appKey = metaData.getString("com.xiaomi.push.app_key");
+          if (appId != null && appKey != null) {
+            config.appId = appId;
+            config.appKey = appKey;
+            config.client = XiaomiPush.class;
+          }
+          break;
+        }
+        case HMS: {
+          Bundle metaData = getMetaData();
+          String appId = metaData.getString("com.huawei.push.app_id");
+          if (appId != null) {
+            config.appId = appId;
+            config.client = HmsPush.class;
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    } catch (PackageManager.NameNotFoundException e) {
+      e.printStackTrace();
+    }
+    return config;
   }
 
   private Bundle getMetaData() throws PackageManager.NameNotFoundException {
@@ -223,12 +252,14 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
             PackageManager.GET_META_DATA).metaData;
   }
 
-  private Task<Map<String, Object>> requestPermission(Map<String, Object> arguments) {
+  private Task<Map<String, Object>> requestPermission() {
     return Tasks.call(
         cachedThreadPool,
         () -> {
-          boolean isEnabled = NotificationManagerCompat.from(applicationContext).areNotificationsEnabled();
-          if ((pushClient != null && pushClient.getType() == PushType.OPPO) || HeytapPushManager.isSupportPush()) {
+          boolean isEnabled =
+              NotificationManagerCompat.from(applicationContext).areNotificationsEnabled();
+          if ((pushClient != null && pushClient.getType() == PushType.OPPO)
+              || HeytapPushManager.isSupportPush()) {
             LogUtils.d("HeytapPushManager.requestNotificationPermission");
             HeytapPushManager.requestNotificationPermission();
           }
@@ -244,23 +275,27 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
     return Tasks.call(
         cachedThreadPool,
         () -> {
-          pushClient.deleteToken();
+          if (pushClient != null) {
+            pushClient.deleteToken();
+          }
           return null;
         });
   }
 
-  private Task<Map<String, Object>> getToken(Map<String, Object> arguments) {
+  private Task<Map<String, Object>> getToken() {
     return Tasks.call(
         cachedThreadPool,
         () -> {
-          String pushType = pushClient.getType().name();
-          String token = newTokenMap.get(pushType);
-          if (TextUtils.isEmpty(token)) {
-            token = pushClient.getToken();
-          }
           HashMap<String, Object> map = new HashMap<>();
-          map.put("type", pushType);
-          map.put("token", token);
+          if (pushClient != null) {
+            String pushType = pushClient.getType().name();
+            String token = newTokenMap.get(pushType);
+            if (TextUtils.isEmpty(token)) {
+              token = pushClient.getToken();
+            }
+            map.put("type", pushType);
+            map.put("token", token);
+          }
           return map;
         });
   }
@@ -377,7 +412,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
         methodCallTask = initPush();
         break;
       case "Messaging#requestPermission":
-        methodCallTask = requestPermission(call.arguments());
+        methodCallTask = requestPermission();
         break;
       case "Messaging#getInitialMessage":
         methodCallTask = getInitialMessage(call.arguments());
@@ -386,7 +421,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
         methodCallTask = deleteToken(call.arguments());
         break;
       case "Messaging#getToken":
-        methodCallTask = getToken(call.arguments());
+        methodCallTask = getToken();
         break;
       case "Messaging#subscribeToTopic":
         methodCallTask = subscribeToTopic(call.arguments());

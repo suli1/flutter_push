@@ -8,4 +8,5 @@ public class PushConfig {
   public String appId;
   public String appKey;
   public String appSecret;
+  public Class<? extends IPush> client;
 }
