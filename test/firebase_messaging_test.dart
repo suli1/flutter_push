@@ -6,9 +6,7 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:flutter_push/firebase_messaging.dart';
-import 'package:flutter_push/src/platform_interface/message_token.dart';
 import 'package:flutter_push/src/platform_interface/method_channel/platform_interface_messaging.dart';
-import 'package:flutter_push/src/platform_interface/utils/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 

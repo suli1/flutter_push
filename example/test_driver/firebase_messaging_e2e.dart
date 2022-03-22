@@ -9,9 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'instance_e2e.dart';
 
-// Requires that an emulator is running locally
-bool USE_EMULATOR = false;
-
 void testsMain() {
   setUpAll(() async {
     // await Firebase.initializeApp();

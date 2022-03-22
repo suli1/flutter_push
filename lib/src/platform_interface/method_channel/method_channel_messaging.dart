@@ -212,8 +212,14 @@ class MethodChannelFirebaseMessaging extends FirebaseMessagingPlatform {
       if (result == null) {
         return null;
       }
-      return MessageToken(type: result['type'], token: result['token']);
-    } catch (e) {
+      String? type = result['type'];
+      String? token = result['token'];
+      if (type != null && token != null) {
+        return MessageToken(type: type, token: token);
+      }
+      return null;
+    } catch (e, s) {
+      debugPrintStack(stackTrace: s);
       throw convertPlatformException(e);
     }
   }
