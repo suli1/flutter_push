@@ -16,7 +16,7 @@ rootProject.allprojects {
   repositories {
     google()
     mavenCentral()
-    maven { url 'https://developer.huawei.com/repo/' }
+//    maven { url 'https://developer.huawei.com/repo/' }
     flatDir {
       dirs project(':flutter_push').file('aars')
     }
@@ -60,8 +60,8 @@ android {
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation fileTree(dir: 'libs', include: '*.jar')
     compileOnly(name: 'push_oppo-2.1.0', ext: 'aar')
-    compileOnly(name: 'push_vivo_3.0.0.0_480', ext: 'aar')
-    compileOnly 'com.huawei.hms:push:5.0.4.302'
+//    compileOnly(name: 'push_vivo_3.0.0.0_480', ext: 'aar')
+//    compileOnly 'com.huawei.hms:push:5.0.4.302'
   }
 }
 

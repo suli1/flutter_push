@@ -57,16 +57,16 @@
         <!--  FCM配置 End -->
 
         <!-- Huawei Push配置 -->
-        <meta-data
-            android:name="push_kit_auto_init_enabled"
-            android:value="false" />
-        <service
-            android:name="io.flutter.plugins.firebase.messaging.core.receiver.HmsMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.huawei.push.action.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
+<!--        <meta-data-->
+<!--            android:name="push_kit_auto_init_enabled"-->
+<!--            android:value="false" />-->
+<!--        <service-->
+<!--            android:name="io.flutter.plugins.firebase.messaging.core.receiver.HmsMessagingService"-->
+<!--            android:exported="false">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="com.huawei.push.action.MESSAGING_EVENT" />-->
+<!--            </intent-filter>-->
+<!--        </service>-->
         <!-- Huawei Push配置 End -->
 
         <!-- Xiaomi Push配置 -->
@@ -126,17 +126,17 @@
         <!-- Xiaomi Push配置 End -->
 
         <!--Vivo Push配置 -->
-        <service
-            android:name="com.vivo.push.sdk.service.CommandClientService"
-            android:exported="true"
-            />
+<!--        <service-->
+<!--            android:name="com.vivo.push.sdk.service.CommandClientService"-->
+<!--            android:exported="true"-->
+<!--            />-->
 
-        <receiver
-            android:name="io.flutter.plugins.firebase.messaging.core.receiver.VivoMessagingReceiver">
-            <intent-filter>
-                <action android:name="com.vivo.pushclient.action.RECEIVE" />
-            </intent-filter>
-        </receiver>
+<!--        <receiver-->
+<!--            android:name="io.flutter.plugins.firebase.messaging.core.receiver.VivoMessagingReceiver">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="com.vivo.pushclient.action.RECEIVE" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
 
         <!--Vivo Push配置 End -->
 

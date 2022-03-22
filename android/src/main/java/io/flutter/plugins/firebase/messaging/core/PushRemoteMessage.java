@@ -3,7 +3,6 @@ package io.flutter.plugins.firebase.messaging.core;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.vivo.push.model.UPSNotificationMessage;
 import com.xiaomi.mipush.sdk.MiPushMessage;
 
 import java.util.HashMap;
@@ -55,40 +54,40 @@ public class PushRemoteMessage implements Parcelable {
     return message;
   }
 
-  public static PushRemoteMessage buildFromHuawei(com.huawei.hms.push.RemoteMessage remoteMessage) {
-    PushRemoteMessage message = new PushRemoteMessage();
-    message.collapseKey = remoteMessage.getCollapseKey();
-    message.from = remoteMessage.getFrom();
-    message.to = remoteMessage.getTo();
-    message.messageId = remoteMessage.getMessageId();
-    message.messageType = remoteMessage.getMessageType();
-    message.data = remoteMessage.getDataOfMap();
-    message.ttl = remoteMessage.getTtl();
-    message.sentTime = remoteMessage.getSentTime();
-
-    message.notification = new Notification();
-    com.huawei.hms.push.RemoteMessage.Notification remoteNotification =
-        remoteMessage.getNotification();
-    message.notification.title = remoteNotification.getTitle();
-    message.notification.titleLocKey = remoteNotification.getTitleLocalizationKey();
-    message.notification.titleLocArgs = remoteNotification.getTitleLocalizationArgs();
-    message.notification.body = remoteNotification.getBody();
-    message.notification.bodyLocKey = remoteNotification.getBodyLocalizationKey();
-    message.notification.bodyLocArgs = remoteNotification.getBodyLocalizationArgs();
-
-    message.notification.android = new AndroidNotification();
-    message.notification.android.channelId = remoteNotification.getChannelId();
-    message.notification.android.clickAction = remoteNotification.getClickAction();
-    message.notification.android.color = remoteNotification.getColor();
-    message.notification.android.smallIcon = remoteNotification.getIcon();
-    message.notification.android.imageUrl = remoteNotification.getImageUrl().toString();
-    message.notification.android.link = remoteNotification.getLink().toString();
-    message.notification.android.sound = remoteNotification.getSound();
-    message.notification.android.ticker = remoteNotification.getTicker();
-    message.notification.android.visibility = remoteNotification.getVisibility();
-
-    return message;
-  }
+  //public static PushRemoteMessage buildFromHuawei(com.huawei.hms.push.RemoteMessage remoteMessage) {
+  //  PushRemoteMessage message = new PushRemoteMessage();
+  //  message.collapseKey = remoteMessage.getCollapseKey();
+  //  message.from = remoteMessage.getFrom();
+  //  message.to = remoteMessage.getTo();
+  //  message.messageId = remoteMessage.getMessageId();
+  //  message.messageType = remoteMessage.getMessageType();
+  //  message.data = remoteMessage.getDataOfMap();
+  //  message.ttl = remoteMessage.getTtl();
+  //  message.sentTime = remoteMessage.getSentTime();
+  //
+  //  message.notification = new Notification();
+  //  com.huawei.hms.push.RemoteMessage.Notification remoteNotification =
+  //      remoteMessage.getNotification();
+  //  message.notification.title = remoteNotification.getTitle();
+  //  message.notification.titleLocKey = remoteNotification.getTitleLocalizationKey();
+  //  message.notification.titleLocArgs = remoteNotification.getTitleLocalizationArgs();
+  //  message.notification.body = remoteNotification.getBody();
+  //  message.notification.bodyLocKey = remoteNotification.getBodyLocalizationKey();
+  //  message.notification.bodyLocArgs = remoteNotification.getBodyLocalizationArgs();
+  //
+  //  message.notification.android = new AndroidNotification();
+  //  message.notification.android.channelId = remoteNotification.getChannelId();
+  //  message.notification.android.clickAction = remoteNotification.getClickAction();
+  //  message.notification.android.color = remoteNotification.getColor();
+  //  message.notification.android.smallIcon = remoteNotification.getIcon();
+  //  message.notification.android.imageUrl = remoteNotification.getImageUrl().toString();
+  //  message.notification.android.link = remoteNotification.getLink().toString();
+  //  message.notification.android.sound = remoteNotification.getSound();
+  //  message.notification.android.ticker = remoteNotification.getTicker();
+  //  message.notification.android.visibility = remoteNotification.getVisibility();
+  //
+  //  return message;
+  //}
 
   public static PushRemoteMessage buildFromXiaomi(MiPushMessage remoteMessage) {
     PushRemoteMessage message = new PushRemoteMessage();
@@ -104,17 +103,17 @@ public class PushRemoteMessage implements Parcelable {
     return message;
   }
 
-  public static PushRemoteMessage buildFromVivo(UPSNotificationMessage remoteMessage) {
-    PushRemoteMessage message = new PushRemoteMessage();
-    message.messageId = String.valueOf(remoteMessage.getMsgId());
-    message.data = remoteMessage.getParams();
-    message.notification = new Notification();
-    message.notification.title = remoteMessage.getTitle();
-    message.notification.body = remoteMessage.getContent();
-    message.notification.android = new AndroidNotification();
-
-    return message;
-  }
+  //public static PushRemoteMessage buildFromVivo(UPSNotificationMessage remoteMessage) {
+  //  PushRemoteMessage message = new PushRemoteMessage();
+  //  message.messageId = String.valueOf(remoteMessage.getMsgId());
+  //  message.data = remoteMessage.getParams();
+  //  message.notification = new Notification();
+  //  message.notification.title = remoteMessage.getTitle();
+  //  message.notification.body = remoteMessage.getContent();
+  //  message.notification.android = new AndroidNotification();
+  //
+  //  return message;
+  //}
 
 
   public String collapseKey;

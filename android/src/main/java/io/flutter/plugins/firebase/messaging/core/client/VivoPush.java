@@ -1,11 +1,11 @@
 package io.flutter.plugins.firebase.messaging.core.client;
 
-import com.vivo.push.PushClient;
+//import com.vivo.push.PushClient;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import io.flutter.plugins.firebase.messaging.core.LogUtils;
+//import io.flutter.plugins.firebase.messaging.core.LogUtils;
 import io.flutter.plugins.firebase.messaging.core.PushConfig;
 
 /**
@@ -21,21 +21,22 @@ public class VivoPush extends BasePushClient {
 
   @Override
   public void register() {
-    PushClient.getInstance(getContext()).initialize();
-
-    PushClient.getInstance(getContext()).turnOnPush(state -> {
-      LogUtils.d("vivo push status changed:" + state);
-    });
+    //PushClient.getInstance(getContext()).initialize();
+    //
+    //PushClient.getInstance(getContext()).turnOnPush(state -> {
+    //  LogUtils.d("vivo push status changed:" + state);
+    //});
   }
 
   @Override
   public void unregister() {
-    PushClient.getInstance(getContext()).turnOffPush(state -> LogUtils.d("vivo push status changed:" + state));
+    //PushClient.getInstance(getContext()).turnOffPush(state -> LogUtils.d("vivo push status changed:" + state));
   }
 
   @Override
   public String getToken() throws Exception {
-    return PushClient.getInstance(getContext()).getRegId();
+    //return PushClient.getInstance(getContext()).getRegId();
+    return  null;
   }
 
   @Override
