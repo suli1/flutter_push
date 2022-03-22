@@ -221,9 +221,14 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
           }
           break;
         }
-        case VIVO:
-          config.client = VivoPush.class;
-          break;
+        case VIVO: {
+          Bundle metaData = getMetaData();
+          if (metaData.containsKey("com.vivo.push.app_id")
+              && metaData.containsKey("com.vivo.push.app_id")) {
+            config.client = VivoPush.class;
+          }
+        }
+        break;
         case XIAO_MI: {
           Bundle metaData = getMetaData();
           String appId = metaData.getString("com.xiaomi.push.app_id");
