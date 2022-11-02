@@ -22,7 +22,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.heytap.msp.push.HeytapPushManager;
+//import com.heytap.msp.push.HeytapPushManager;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -174,7 +174,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
     return Tasks.call(
         cachedThreadPool,
         () -> {
-          HeytapPushManager.init(applicationContext, LogUtils.debuggable);
+          //HeytapPushManager.init(applicationContext, LogUtils.debuggable);
           PushType pushType = FlutterMessagingUtils.getSupportedPush(applicationContext);
           if (pushType == null) {
             pushType = PushType.XIAO_MI;
@@ -270,11 +270,11 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver implements
         () -> {
           boolean isEnabled =
               NotificationManagerCompat.from(applicationContext).areNotificationsEnabled();
-          if ((pushClient != null && pushClient.getType() == PushType.OPPO)
-              || HeytapPushManager.isSupportPush()) {
-            LogUtils.d("HeytapPushManager.requestNotificationPermission");
-            HeytapPushManager.requestNotificationPermission();
-          }
+          //if ((pushClient != null && pushClient.getType() == PushType.OPPO)
+          //    || HeytapPushManager.isSupportPush()) {
+          //  LogUtils.d("HeytapPushManager.requestNotificationPermission");
+          //  HeytapPushManager.requestNotificationPermission();
+          //}
           return new HashMap<String, Object>() {
             {
               put("authorizationStatus", isEnabled ? 1 : 0);

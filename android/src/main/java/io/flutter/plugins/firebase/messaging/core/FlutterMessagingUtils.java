@@ -15,7 +15,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
-import com.heytap.msp.push.HeytapPushManager;
+//import com.heytap.msp.push.HeytapPushManager;
 //import com.vivo.push.PushClient;
 
 import java.util.Arrays;
@@ -50,13 +50,14 @@ public class FlutterMessagingUtils {
 
   @Nullable
   public static PushType getSupportedPush(Context context) {
-    if (HeytapPushManager.isSupportPush()) {
-      return PushType.OPPO;
+    //if (HeytapPushManager.isSupportPush()) {
+    //  return PushType.OPPO;
     //} else if (RomUtils.isEmui()) {
     //  return PushType.HMS;
     //} else if (PushClient.getInstance(context).isSupport()) {
     //  return PushType.VIVO;
-    } else if (RomUtils.isMiui()) {
+    //} else
+    if (RomUtils.isMiui()) {
       return PushType.XIAO_MI;
     } else if (isSupportFcm(context)) {
       return PushType.FCM;

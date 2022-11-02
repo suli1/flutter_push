@@ -1,12 +1,12 @@
 package io.flutter.plugins.firebase.messaging.core.client;
 
-import com.heytap.msp.push.HeytapPushManager;
+//import com.heytap.msp.push.HeytapPushManager;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import io.flutter.plugins.firebase.messaging.core.PushConfig;
-import io.flutter.plugins.firebase.messaging.core.receiver.OppoMessagingService;
+//import io.flutter.plugins.firebase.messaging.core.receiver.OppoMessagingService;
 
 /**
  * Created by suli on 2020/12/7
@@ -22,17 +22,18 @@ public class OppoPush extends BasePushClient {
 
   @Override
   public void register() {
-    HeytapPushManager.register(getContext(), config.appKey, config.appSecret, new OppoMessagingService(getContext()));
+    //HeytapPushManager.register(getContext(), config.appKey, config.appSecret, new OppoMessagingService(getContext()));
   }
 
   @Override
   public void unregister() {
-    HeytapPushManager.unRegister();
+    //HeytapPushManager.unRegister();
   }
 
   @Override
   public String getToken() throws Exception {
-    return HeytapPushManager.getRegisterID();
+    //return HeytapPushManager.getRegisterID();
+    return  null;
   }
 
   @Override
